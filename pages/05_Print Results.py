@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.io as pio
 from fpdf import FPDF
 import time
+import base64
 
 test_options = st.session_state['test_options']
 # filename_txt  = st.session_state['filename_txt']
@@ -244,13 +245,30 @@ def create_report(filename = "Test_report.pdf"):
 # def local_css(file_name):
 #     with open(file_name) as f:
 #         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+def create_download_link(val, filename):
+    b64 = base64.b64encode(val)  # val looks like b'...'
+    return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{filename}.pdf">Download file</a>'
 
 if __name__ == '__main__':
-    # local_css("style/style.css")
-    if st.button('Do you want to generate a report?'):
+    
+    report_text = st.text_input("Report Text")
+    export_as_pdf = st.button("Export Report")
+
+    if export_as_pdf:
+        # pdf = FPDF()
+        # pdf.add_page()
+        # pdf.set_font('Arial', 'B', 16)
+        # pdf.cell(40, 10, report_text)
         create_report(test_filename) 
-        with st.spinner('Generating Report'):
-            time.sleep(4)
-        st.success('Report is Complete!')
+        html = create_download_link(pdf.output(dest="S").encode("latin-1"), "test")
+
+    st.markdown(html, unsafe_allow_html=True)
+    
+    # local_css("style/style.css")
+    # if st.button('Do you want to generate a report?'):
+    #     create_report(test_filename) 
+    #     with st.spinner('Generating Report'):
+    #         time.sleep(4)
+    #     st.success('Report is Complete!')
     
     
