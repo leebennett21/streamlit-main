@@ -7,7 +7,8 @@ from fpdf import FPDF
 import time
 
 test_options = st.session_state['test_options']
-filename_txt  = st.session_state['filename_txt']
+# filename_txt  = st.session_state['filename_txt']
+filename_txt  = '000300780027.txt'
 split_filename = filename_txt.split('.')[0]
 test_filename = f"{test_options} {split_filename}.pdf"
 current_time = time.localtime() # get the current time as a time.struct_time object
