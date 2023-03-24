@@ -595,7 +595,7 @@ placeholder = st.empty()
 with placeholder.container():        
     if test_options == 'Test Case 4':
         
-        fig = px.line(df[db_delta_minus_idx-100:db_delta_plus_idx+100], x='Time_trans', y=['Front tire X position trans', 'Vehicle bumper X position trans'], color_discrete_sequence = ['navy', 'darkorange'])
+        fig = px.line(df[db_delta_minus_idx-50:db_delta_plus_idx+50], x='Time_trans', y=['Front tire X position trans', 'Vehicle bumper X position trans'], color_discrete_sequence = ['navy', 'darkorange'])
         fig.add_vline(x=da_meas_time-start_time_trans,line_width=1, line_dash="dash", line_color="green")
         # fig.add_vline(x=test_end_time,line_width=1, line_dash="dashdot", line_color="red")
         fig.add_hline(y=-da,line_width=1, line_dash="dash", line_color="green")
@@ -657,7 +657,7 @@ with placeholder.container():
         st.plotly_chart(fig, use_container_width=True)
     else:
         
-        fig = px.line(df[db_delta_minus_idx-100:db_delta_plus_idx+100], x='Time_trans', y=['Front tire X position trans', 'Vehicle bumper X position trans'], color_discrete_sequence = ['navy', 'darkorange'])
+        fig = px.line(df[db_delta_minus_idx-50:db_delta_plus_idx+50], x='Time_trans', y=['Front tire X position trans', 'Vehicle bumper X position trans'], color_discrete_sequence = ['navy', 'darkorange'])
         fig.add_vline(x=da_meas_time-start_time_trans,line_width=1, line_dash="dash", line_color="green")
         # fig.add_vline(x=test_end_time,line_width=1, line_dash="dashdot", line_color="red")
         fig.add_hline(y=-da,line_width=1, line_dash="dash", line_color="green")
