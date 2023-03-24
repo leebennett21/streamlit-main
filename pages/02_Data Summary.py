@@ -603,9 +603,6 @@ with placeholder.container():
         fig.add_hrect(y0=-da-0.5, y1=-da+0.5, line_width=0, fillcolor="green", opacity=0.2)
         fig.add_hrect(y0=-db-0.5, y1=-db+0.5, line_width=0, fillcolor="green", opacity=.2)
 
-        fig.add_vline(x=FPI_time-start_time_trans,line_width=1, line_dash="solid", line_color="black")
-        fig.add_vline(x=LPI_time-start_time_trans,line_width=1, line_dash="solid", line_color="black")
-
         fig.update_layout(
             {'title':{'text': 'Vehicle and Bicycle distance over Time', 
                                 'x':0.4, 'y':0.95, 
@@ -613,10 +610,10 @@ with placeholder.container():
                                 'font_color':'red'}},
             legend_title="",
             showlegend=True)
-        fig.add_annotation(x=t_start-start_time_trans, y=-65,
-                    text="Start of Bicycle",
-                    showarrow=True,
-                    arrowhead=1)
+        # fig.add_annotation(x=t_start-start_time_trans, y=-65,
+        #             text="Start of Bicycle",
+        #             showarrow=True,
+        #             arrowhead=1)
         
         fig.add_annotation(x=da_meas_time-start_time_trans, y=-da,
                     text="da",
@@ -626,14 +623,14 @@ with placeholder.container():
                     text="db",
                     showarrow=True,
                     arrowhead=1)
-        fig.add_annotation(x=FPI_time-start_time_trans, y=0,
-                    text="FPI",
-                    showarrow=True,
-                    arrowhead=1)
-        fig.add_annotation(x=LPI_time-start_time_trans, y=0,
-                    text="LPI",
-                    showarrow=True,
-                    arrowhead=1)            
+        # fig.add_annotation(x=FPI_time-start_time_trans, y=0,
+        #             text="FPI",
+        #             showarrow=True,
+        #             arrowhead=1)
+        # fig.add_annotation(x=LPI_time-start_time_trans, y=0,
+        #             text="LPI",
+        #             showarrow=True,
+        #             arrowhead=1)            
         # fig.add_annotation(x=test_end_time-veh_entercorridor_time, y=15,
         #             text="Simulated Collision",
         #             showarrow=True,
@@ -668,12 +665,7 @@ with placeholder.container():
         fig.add_hrect(y0=-da-0.5, y1=-da+0.5, line_width=0, fillcolor="green", opacity=0.2)
         fig.add_hrect(y0=-db-0.5, y1=-db+0.5, line_width=0, fillcolor="green", opacity=.2)
         fig.add_shape(type="rect", x0=db_delta_minus_time, y0=-da-0.5, x1=db_delta_plus_time, y1=-da+0.5, line=dict(color="Red", width=2, dash="dash"))
-        # fig.add_vline(x=veh_entercorridor_time,line_width=1, line_dash="dash", line_color="red")
-        # fig.add_hline(y=0.5+bike_vel,line_width=1, line_dash="dash", line_color="red")
-        # fig.add_hline(y=-0.5+bike_vel,line_width=1, line_dash="dash", line_color="red")
-        # fig.add_vline(x=FPI_time-veh_entercorridor_time,line_width=1, line_dash="solid", line_color="black")
-        fig.add_vline(x=LPI_time-start_time_trans,line_width=1, line_dash="solid", line_color="black")
-
+        
         fig.update_layout(
             {'title':{'text': 'Vehicle and Bicycle distance over Time', 
                                 'x':0.4, 'y':0.95, 
@@ -681,15 +673,6 @@ with placeholder.container():
                                 'font_color':'red'}},
             legend_title="",                    
             showlegend=True)
-
-        # fig.add_annotation(x=da_meas_time-start_time_trans, y=d_db_meas +30,
-        #             text="da db Sync time",
-        #             showarrow=True,
-        #             arrowhead=1)
-        fig.add_annotation(x=t_start-start_time_trans, y=-65,
-                    text="Start of Bicycle",
-                    showarrow=True,
-                    arrowhead=1)
         
         fig.add_annotation(x=da_meas_time-start_time_trans, y=-da,
                     text="da",
@@ -699,11 +682,6 @@ with placeholder.container():
                     text="db",
                     showarrow=True,
                     arrowhead=1)
-
-        fig.add_annotation(x=LPI_time-start_time_trans, y=0,
-                    text="LPI",
-                    showarrow=True,
-                    arrowhead=1)            
 
         fig.update_xaxes(title_text='Time (s)',
                         minor_ticks="outside", 
