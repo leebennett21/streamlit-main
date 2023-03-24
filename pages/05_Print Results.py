@@ -14,49 +14,49 @@ test_filename = f"{test_options} {split_filename}.pdf"
 current_time = time.localtime() # get the current time as a time.struct_time object
 formatted_time = time.strftime("%B %d, %Y", current_time) # format the time as month day year
 
-da_position = st.session_state['da_position']
-db_position = st.session_state['db_position']
-t_start = st.session_state['t_start']
-test_start = st.session_state['test_start']
-######################## Criteria 1, 2 ##########################################
-#vehicle position at the start of the corridor, start of test, and end of test
-veh_entercorridor_time = st.session_state['veh_entercorridor_time']
+# da_position = st.session_state['da_position']
+# db_position = st.session_state['db_position']
+# t_start = st.session_state['t_start']
+# test_start = st.session_state['test_start']
+# ######################## Criteria 1, 2 ##########################################
+# #vehicle position at the start of the corridor, start of test, and end of test
+# veh_entercorridor_time = st.session_state['veh_entercorridor_time']
 
-veh_lat_mean = st.session_state['veh_lat_mean']
-veh_lat_std = st.session_state['veh_lat_std']
-bike_lat_mean = st.session_state['bike_lat_mean']
-bike_lat_std = st.session_state['bike_lat_std']
+# veh_lat_mean = st.session_state['veh_lat_mean']
+# veh_lat_std = st.session_state['veh_lat_std']
+# bike_lat_mean = st.session_state['bike_lat_mean']
+# bike_lat_std = st.session_state['bike_lat_std']
 crit_1= st.session_state['crit_1']
 crit_2= st.session_state['crit_2']
 ######################## Criteria 3, 4, 6, 7  ##########################################
-veh_vel_corr_mean = st.session_state['veh_vel_corr_mean']
-veh_vel_corr_std = st.session_state['veh_vel_corr_std']
-bike_vel_corr_max = st.session_state['bike_vel_corr_max']
-veh_vel_mean = st.session_state['veh_vel_mean']
-veh_vel_std = st.session_state['veh_vel_std']
-bike_vel_mean = st.session_state['bike_vel_mean']
-bike_vel_std = st.session_state['bike_vel_std']
+# veh_vel_corr_mean = st.session_state['veh_vel_corr_mean']
+# veh_vel_corr_std = st.session_state['veh_vel_corr_std']
+# bike_vel_corr_max = st.session_state['bike_vel_corr_max']
+# veh_vel_mean = st.session_state['veh_vel_mean']
+# veh_vel_std = st.session_state['veh_vel_std']
+# bike_vel_mean = st.session_state['bike_vel_mean']
+# bike_vel_std = st.session_state['bike_vel_std']
 crit_3= st.session_state['crit_3']
 crit_4= st.session_state['crit_4']
 crit_6= st.session_state['crit_6']
 crit_7= st.session_state['crit_7']
 ######################## Criteria 5 ##########################################
-d_bike_acc = st.session_state['d_bike_acc']
-d_bike_start = st.session_state['d_bike_start']
-d_bike_end =st.session_state['d_bike_end']
+# d_bike_acc = st.session_state['d_bike_acc']
+# d_bike_start = st.session_state['d_bike_start']
+# d_bike_end =st.session_state['d_bike_end']
 crit_5= st.session_state['crit_5']
 ######################## Criteria 8 ##########################################
-d_da_meas = st.session_state['d_da_meas']
-d_db_meas = st.session_state['d_db_meas']
-d_db_meas_dbadj = st.session_state['d_db_meas_dbadj']
-da_meas_time = st.session_state['da_meas_time']
+# d_da_meas = st.session_state['d_da_meas']
+# d_db_meas = st.session_state['d_db_meas']
+# d_db_meas_dbadj = st.session_state['d_db_meas_dbadj']
+# da_meas_time = st.session_state['da_meas_time']
 crit_8= st.session_state['crit_8']
 ######################## LPI and FPI ##########################################
-LPI_time = st.session_state['LPI_time']
-LPI_Frame = st.session_state['LPI_Frame']
-FPI_time = st.session_state['FPI_time'] 
-FPI_Frame = st.session_state['FPI_Frame']
-dd = st.session_state['dd']
+# LPI_time = st.session_state['LPI_time']
+# LPI_Frame = st.session_state['LPI_Frame']
+# FPI_time = st.session_state['FPI_time'] 
+# FPI_Frame = st.session_state['FPI_Frame']
+# dd = st.session_state['dd']
 ######################## Provide a Summary Chart ##########################################
 criteria = [crit_1, crit_2, crit_3, crit_4, crit_5, crit_6, crit_7, crit_8] #boolean list of criteria
 criteria_list = ['criteria_1', 'criteria_2', 'criteria_3', 'criteria_4', 'criteria_5', 'criteria_6', 'criteria_7', 'criteria_8']
@@ -167,7 +167,7 @@ def create_report(filename = "Test_report.pdf"):
     pdf.cell(40,10, f'Report generated on {formatted_time}', ln=1)
     pdf.set_xy(Width/4, 20)
     pdf.set_font('', 'U')
-    pdf.cell(100, 10, txt = f'Regulation 151 {test_options} Summary', ln=1)
+    pdf.cell(100, 10, txt = 'Regulation 151 Summary', ln=1)
     pdf.set_font('Arial', 'B', 12)
     pdf.cell(40, 10,f'File name:  {split_filename}', ln=1)
 
