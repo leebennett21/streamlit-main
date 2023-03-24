@@ -175,9 +175,6 @@ def create_report(filename = "Test_report.pdf"):
     pdf.set_font('Arial', 'B', 12)
     pdf.cell(40, 10,f'File name:  {split_filename}', ln=1)
 
-    # pdf.cell(40, 10,f'Data Summary for {test_options}', ln=1)
-    # pdf.cell(40, 10,f'File name:  {split_filename}')
-    # pdf.cell(42, 10, f'Generated on {formatted_time}')
     pdf.image("plot5.jpeg", 0, 60, Width/2)
     pdf.image("Criteria.jpeg", Width/2, 60, Width/2 -5)
     pdf.ln()
@@ -249,14 +246,6 @@ def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# if __name__ == '__main__':
-#     # local_css("style/style.css")
-#     if st.button('Do you want to generate a report?'):
-#         create_report(test_filename) 
-#         with st.spinner('Generating Report'):
-#             time.sleep(4)
-#         st.success('Report is Complete!')
-    
     
 def create_download_link(val, filename):
     b64 = base64.b64encode(val)  # val looks like b'...'
@@ -269,7 +258,7 @@ if __name__ == '__main__':
         create_report(test_filename) 
         html = create_download_link(pdf.output(dest="S").encode("latin-1"), f"{test_filename}")
         with st.spinner('Generating Report'):
-            time.sleep(4)
+            time.sleep(3)
         st.success('Report is Complete!')
         st.markdown(html, unsafe_allow_html=True)
 
