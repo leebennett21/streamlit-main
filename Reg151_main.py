@@ -336,20 +336,20 @@ if uploaded_file:
             veh_end_location = df.loc[test_end_time_idx,'Vehicle bumper X position']
             # translate vehicle dataframe
             df['Vehicle bumper X position trans'] = df.iloc[veh_entercorridor_time_idx:test_end_time_idx][['Vehicle bumper X position']].reset_index(drop=True)- (bike_trig_location+65)
-            db_delta_plus = df.loc[(df['Vehicle bumper X position trans'] >= -db + 0.5), 'Time' ].index[0]
-            db_delta_plus_time = df['Time'].iloc[db_delta_plus]
+            db_delta_plus_idx = df.loc[(df['Vehicle bumper X position trans'] >= -db + 0.5), 'Time' ].index[0]
+            db_delta_plus_time = df['Time'].iloc[db_delta_plus_idx]
             # print('db_delta_plus_time', db_delta_plus_time)
-            db_delta_minus = df.loc[(df['Vehicle bumper X position trans'] >= -db - 0.5), 'Time'].index[0]
-            db_delta_minus_time = df['Time'].iloc[db_delta_minus]
+            db_delta_minus_idx = df.loc[(df['Vehicle bumper X position trans'] >= -db - 0.5), 'Time'].index[0]
+            db_delta_minus_time = df['Time'].iloc[db_delta_minus_idx]
             #translate bike dataframe
             df['Front tire X position trans'] = (df.iloc[veh_entercorridor_time_idx:test_end_time_idx][['Front tire X position']].reset_index(drop=True))- (bike_trig_location+65)
             #translate time dataframe
             start_time_trans = df.loc[veh_entercorridor_time_idx, 'Time']
             df['Time_trans'] = (df.iloc[veh_entercorridor_time_idx:test_end_time_idx][['Time']].reset_index(drop=True))-start_time_trans
             # sync_time_trans = da_meas_time-start_time_trans   
-        return veh_trig_location, veh_entercorridor_time_idx, veh_entercorridor_location, veh_entercorridor_time, veh_end_location, start_time_trans, bike_trig_location,db_delta_plus_time,db_delta_minus_time
+        return veh_trig_location, veh_entercorridor_time_idx, veh_entercorridor_location, veh_entercorridor_time, veh_end_location, start_time_trans, bike_trig_location,db_delta_plus_time,db_delta_minus_time,db_delta_plus_idx,db_delta_minus_idx
         
-    veh_trig_location, veh_entercorridor_time_idx, veh_entercorridor_location, veh_entercorridor_time, veh_end_location, start_time_trans, bike_trig_location,db_delta_plus_time,db_delta_minus_time = time_transform(df, trig_start_idx, test_end_time_idx, test_options,db)
+    veh_trig_location, veh_entercorridor_time_idx, veh_entercorridor_location, veh_entercorridor_time, veh_end_location, start_time_trans, bike_trig_location,db_delta_plus_time,db_delta_minus_time,db_delta_plus_idx,db_delta_minus_idx = time_transform(df, trig_start_idx, test_end_time_idx, test_options,db)
     st.session_state['veh_entercorridor_location'] = veh_entercorridor_location
     st.session_state['veh_entercorridor_time'] = veh_entercorridor_time
     st.session_state['veh_entercorridor_time_idx'] = veh_entercorridor_time_idx
@@ -359,7 +359,9 @@ if uploaded_file:
     st.session_state['veh_end_location'] = veh_end_location
     st.session_state['db_delta_plus_time'] = db_delta_plus_time
     st.session_state['db_delta_minus_time'] = db_delta_minus_time
-#####################################################################################
+    st.session_state['db_delta_plus_idx'] = db_delta_plus_idx
+    st.session_state['db_delta_minus_idx'] = db_delta_minus_idx
+    #####################################################################################
     #shift bike back to origin - some tests do not start at the origin
 
     #find the x position of the bike
