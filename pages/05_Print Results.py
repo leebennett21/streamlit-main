@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
+pio.kaleido.scope.default_format = "jpeg"
+pio.kaleido.scope.default_width = 1000
+pio.kaleido.scope.default_height = 500
 from fpdf import FPDF
 import time
 import base64
