@@ -74,67 +74,53 @@ with expander:
                 bicycle_elements = st.write(bl_m,bw_m,bs_m,bo_m,bb_m, bv_m, bx_m, by_m)
 
 ###############################################################################################################################################################
-# define a function to convert text file to a panda and csv file
-def text_2_csv(uploaded_file, test_options):
+def text_2_csv(uploaded_file):
     df = pd.read_csv(uploaded_file, skiprows =[0,1,2,4], delimiter='\t', encoding='unicode_escape',low_memory=False)
-    timestr = time.strftime("%Y%m%d")
     df_ABD= pd.DataFrame(df)
-    csvfile = str(test_options)+' '+timestr+'.csv'
-    # save txt file to csv
-    df_ABD.to_csv(csvfile, index = False)
-    # st.session_state['df'] = df_ABD
     return df_ABD
-#####################################################################################################################
-st.title('Load AB Dynamics Data for Analysis')
-
-columns = st.columns((4,1,4))
-with columns[0]:
-
-    test_options= st.radio('Choose Test Case For Analysis', options= ['Test Case 1',
-                                                                        'Test Case 2',
-                                                                        'Test Case 3',
-                                                                        'Test Case 4',
-                                                                        'Test Case 5',
-                                                                        'Test Case 6',
-                                                                        'Test Case 7']) 
-    st.session_state['test_options'] = test_options    
-
-#########################################################################################################
 
 
-with columns[2]:
-    test_case_prompts = {
-    'Test Case 1': 'Upload AB Dynamics Test Case 1 File to analyze',
-    'Test Case 2': 'Upload AB Dynamics Test Case 2 File to analyze',
-    'Test Case 3': 'Upload AB Dynamics Test Case 3 File to analyze',
-    'Test Case 4': 'Upload AB Dynamics Test Case 4 File to analyze',
-    'Test Case 5': 'Upload AB Dynamics Test Case 5 File to analyze',
-    'Test Case 6': 'Upload AB Dynamics Test Case 6 File to analyze',
-    'Test Case 7': 'Upload AB Dynamics Test Case 7 File to analyze'}
-
-    uploaded_file = st.file_uploader(test_case_prompts[test_options], type=(["txt", "csv"]))
-    if uploaded_file is not None:
-         if os.path.splitext(uploaded_file.name)[1] == '.csv':
-             df = pd.read_csv(uploaded_file, low_memory=False)
-             st.session_state['df'] = df
-             st.session_state['Test File'] = uploaded_file
-             df = st.session_state['df']
-             testfile = st.session_state['Test File']
-             st.write('Test file:' , testfile.name)
-
-         elif os.path.splitext(uploaded_file.name)[1] == '.txt':
-             df_ABD = text_2_csv(uploaded_file, test_options)
-             st.session_state['df'] = df_ABD
-             st.session_state['Test File'] = uploaded_file
-             df = st.session_state['df']
-             testfile = st.session_state['Test File']
-             st.write('Test file:' , testfile.name)
-    else:
-        st.markdown("<h1 style='text-align: center; color: red;'>Please Load Data for Analysis</h1>", unsafe_allow_html=True)         
-    # df = st.session_state['df']
-    # testfile = st.session_state['Test File']
-    # st.write('Test file:' , testfile.name)
-
+################################################################################################################################################
+st.markdown("<h1 style='text-align: center; color: red;'>Please Load Data for Analysis</h1>", unsafe_allow_html=True)    
+uploaded_file = st.file_uploader("Choose AB Dynamics Test file", type=(["txt"]))
+if uploaded_file is not None:
+    if os.path.splitext(uploaded_file.name)[1] == '.txt':
+        df_ABD = text_2_csv(uploaded_file)
+        st.session_state['df'] = df_ABD
+        st.session_state['Test File'] = uploaded_file
+        df = st.session_state['df']
+        testfile = st.session_state['Test File']
+        
+        filename = f"""<p style="font-family:sans-serif; color:Blue; font-size: 28px;">Test file: {testfile.name}</p>"""
+        st.session_state['filename_txt'] = testfile.name
+        st.markdown(filename, unsafe_allow_html=True)
+        
+        if ("00030066" in uploaded_file.name):
+            test_options = 'Test Case 1'
+            row_index = 0
+        elif ("00030077" in uploaded_file.name):
+            test_options = 'Test Case 2'
+            row_index = 1
+        elif ("00030071" in uploaded_file.name):
+            test_options = 'Test Case 3'
+            row_index = 2
+        elif ("00030072" in uploaded_file.name):
+            test_options = 'Test Case 4'
+            row_index = 3
+        elif ("00030076" in uploaded_file.name):
+            test_options = 'Test Case 5'
+            row_index = 4
+        elif ("00030078" in uploaded_file.name):
+            test_options = 'Test Case 6'
+            row_index = 5
+        elif ("00030079" in uploaded_file.name):
+            test_options = 'Test Case 7'
+            row_index = 6
+        else:
+            st.write("Unknown test file")
+        st.session_state['test_options'] = test_options    
+        testcase= f"""<p style="font-family:sans-serif; color:Blue; font-size: 28px;">{test_options}</p>"""
+        st.markdown(testcase, unsafe_allow_html=True)    
 ################################################################################################################################################
 
 if uploaded_file:
@@ -143,8 +129,7 @@ if uploaded_file:
     xlsxfile = 'Dynamic_Test_Cases.xlsx'
     df_test_crit = pd.read_excel(xlsxfile)
 
-    test_case_indices = {'Test Case 1': 0, 'Test Case 2': 1, 'Test Case 3': 2, 'Test Case 4': 3, 'Test Case 5': 4, 'Test Case 6': 5, 'Test Case 7': 6}
-    row_index = test_case_indices[test_options]
+    
     bike_vel = df_test_crit.iloc[row_index, 1]
     veh_vel = df_test_crit.iloc[row_index, 2]
     d_lat = df_test_crit.iloc[row_index, 3]
@@ -179,17 +164,18 @@ if uploaded_file:
     # ABD is in meters
     conv2kmph=3.6
     df['Vehicle forward velocity'] = conv2kmph* df['Forward velocity']
-    df['Bike forward velocity']=conv2kmph* df['Head tracker forward velocity']
+    df['Bike forward velocity']=conv2kmph* df['Object 1 forward velocity (ref point)']
 
     # correct for adjustment done at the track for wider lateral distances
-    if d_lat == 4.25 and test_options == 'Test Case 4':
+    if d_lat == 4.25:
         df["Vehicle Lateral position"]= df["Y position"]- 1
-    elif d_lat == 4.25:
-        df["Vehicle Lateral position"]= df["Y position"]-0.5
+        df["Bike Lateral position"]= df["Head tracker reference Y position"]
+    # elif d_lat == 4.25:
+    #     df["Vehicle Lateral position"]= df["Y position"]-0.5
     else:
         df["Vehicle Lateral position"]= df["Y position"]
+        df["Bike Lateral position"]= df["Head tracker reference Y position"]+1
 
-    df["Bike Relative Lateral position"]= df["Object 1 relative lateral distance"]
     #Reference the front tire of the bike -->front overhang + Object 1 actual X (front axle)
     df['Front tire X position']= bo_m + df['Object 1 actual X (front axle)']
     # Reference the front bumper of the vehicle -->front overhang + Subject reference X position
@@ -197,235 +183,385 @@ if uploaded_file:
 
     ################################################################################################################################################
     # find where does the bike starts
-    #define bike start thresholds
-    accel_thres = .5
-    # accel_thres1 = 1.5
-    vel_thres = 1.5 # can drop threshold to 1.5
-    #find when the bike starts
-    values = df['Object 1 forward acceleration']
-    #find the first 10 (n) peaks in acceleration and check if it is a valid start
-    n = 10
-    pairs = heapq.nlargest(n, zip(values, range(len(values))))
-    indices = [i for value, i in pairs]
-    start_indices=[]
-    for x in indices:
-        #what is the mean acceleration for t= 150 *.01 = 1.5s
-        mean_acc = df['Object 1 forward acceleration'][x:x+150].mean()
-        #what is the mean velocity after 5 seconds for 1 seconds
-        mean_vel = df['Object 1 forward velocity (ref point)'][x+500:x+600].mean()
-        vel_std = df['Object 1 forward velocity (ref point)'][x+500:x+600].std()
-        if mean_acc >= accel_thres and mean_vel >= vel_thres:
-            start_indices.append(x)
-        
+    
+    def find_trigger_event(df, bike_vel, threshold=0.2):
+        lower_lim = (bike_vel - 0.5) / 3.6
 
-    if start_indices:
-        t_start_idx = min(start_indices)
-    else:
-        t_start_idx = 0
-            
-    st.session_state['t_start_idx'] = t_start_idx
-    t_start = df['Time'].iloc[t_start_idx]
-    # st.write('t start : ',t_start)
+        # Find the time index when the bike velocity passes through the lower limit for the first time
+        df_lower_lim = df[df['Bike forward velocity'] >= lower_lim]
+        test_start_idx = df_lower_lim.index[0]
+        test_early_start_idx_ = test_start_idx - 400
+
+        # Subtract 8 seconds from the time index
+        bike_start_vel = df.loc[test_early_start_idx_:test_start_idx, 'Bike forward velocity']
+
+        # Check if the bike velocity is above the threshold for any point in the time range
+        if (bike_start_vel > threshold).any():
+           
+            # Find the first index greater than the threshold and closest to the test_start_idx
+            threshold_idxs = df[(df['Bike forward velocity'] >= threshold) & (df.index >= test_early_start_idx_)].index
+            trig_start_idx = threshold_idxs.min()-1
+
+            # Use the time index of the closest index to find the start time of the trigger event
+            t_start = df.at[trig_start_idx, 'Time']
+
+            # Return the start time of the trigger event
+            return trig_start_idx, t_start
+        else:
+            # If the bike velocity is never above the threshold, return None
+            st.write('Could not find Bike Velocity Threshold in time range')
+            return None
+
+    trig_start_idx, t_start = find_trigger_event(df, bike_vel, threshold=0.2)  
+
+    st.session_state['trig_start_idx'] = trig_start_idx
     st.session_state['t_start'] = t_start
 
     ##########################################################################################################################################
     # The below code finds the first time index when the bike velocity settles
+    def find_start_time(df, bike_vel):
+        # A good estimate for the bikes velocity
+        #a time index is every 10ms - wait 5s then take the mean for 8s
+        # b_mean=round(df['Bike forward velocity'][trig_start_idx+500:trig_start_idx+1300].mean(), 2)
+        # allow for 1 bounce through the limits
+        lower_lim = bike_vel - 0.5
+        # the time index when the bike velocity passes through the lower limit for the first time
+        test_start_idx = df.loc[(df['Bike forward velocity'] >= lower_lim), ['Time'] ].index[0]
+        test_start_limit_idx = df.loc[(df['Bike forward velocity'] >= lower_lim), ['Time'] ].index[0]
+        # create a 1 second data frame to search
+        df_bounce=df[test_start_idx: test_start_idx+150] 
+        all_indexes = []
+        for index in range(len(df_bounce)):
+            if round(df_bounce["Bike forward velocity"].iloc[index],2 ) <= lower_lim:
+                all_indexes.append(index)
+            else:
+                #if no bounce then add 0
+                all_indexes.append(0)
 
-    # A good estimate for the bikes velocity
-    #a time index is every 10ms - wait 5s then take the mean for 8s
-    b_mean=round(df['Bike forward velocity'][t_start_idx+500:t_start_idx+1300].mean(), 2)
-    # st.write('b_mean : ',b_mean)
+        # add 1 index to get it over the limit
+        add_bounce = 1+max(all_indexes)
+        test_start_idx = test_start_idx + add_bounce
+        test_start = df['Time'].iloc[test_start_idx]
+        test_start_limit = df['Time'].iloc[test_start_limit_idx]
+        return test_start_idx, test_start, test_start_limit_idx,test_start_limit
 
-    # allow for 1 bounce through the limits
-    lower_lim = b_mean - 0.5
-    # the time index when the bike velocity passes through the lower limit for the first time
-    test_start_idx = df.loc[(df['Bike forward velocity'] >= lower_lim), ['Time'] ].index[0]
-    
-    # st.write(test_start_idx)
-    # create a 1 second data frame to search
-    df_bounce=df[test_start_idx: test_start_idx+100] 
-    all_indexes = []
-    for index in range(len(df_bounce)):
-        if round(df_bounce["Bike forward velocity"].iloc[index],2 ) <= lower_lim:
-            all_indexes.append(index)
-        else:
-            #if no bounce then add 0
-            all_indexes.append(0)
+    test_start_idx, test_start, test_start_limit_idx,test_start_limit = find_start_time(df, bike_vel)
 
-    # add 1 index to get it over the limit
-    add_bounce = 1+max(all_indexes)
-    test_start_idx = test_start_idx + add_bounce
     st.session_state['test_start_idx'] = test_start_idx
-    test_start = df['Time'].iloc[test_start_idx]
     st.session_state['test_start'] = test_start
+    st.session_state['test_start_limit_idx'] = test_start_limit_idx
+    st.session_state['test_start_limit'] = test_start_limit
+    # st.write('t start : ',test_start)
 
 #####################################################################################
-# collision time is 8 seconds after the start of the test
-    test_end = test_start + 8
-    st.session_state['test_end'] = test_end
-    test_end_idx = df.loc[(df['Time'] >= test_end), ['Time'] ].index[0]
-    st.session_state['test_end_idx'] = test_end_idx
+# the end of the test is 65m after the bike has been triggered
+# da is defined as =  8 seconds * Velocity of bike
+    def find_end_time(df, trig_start_idx):
+        d_bike_start = df.loc[trig_start_idx, "Front tire X position"]
+        d_bike_end = d_bike_start + 65
+        Max_bike_pos = df['Front tire X position'].max()
+        d_short = round((d_bike_end -Max_bike_pos) + 2 , 1) # add 2m for a little wigle room
+        if d_bike_end < Max_bike_pos:
+            test_end_time_idx = df.loc[(df['Front tire X position'] >= d_bike_end), ['Time'] ].index[0]
+            test_end_time = df.loc[test_end_time_idx,'Time']
+        else: 
+            fail_crit = f"""<p style="font-family:sans-serif; color:Red; font-size: 28px;">The bicycle did not reach the 65m mark. Try extending the bike path {d_short}m </p>"""
+            st.markdown(fail_crit, unsafe_allow_html=True)
+        return test_end_time_idx, test_end_time,d_bike_end
+    # st.write(df['Front tire X position'])
+    test_end_time_idx, test_end_time, d_bike_end = find_end_time(df, trig_start_idx)
+    
+    st.session_state['test_end_time'] = test_end_time
+    st.session_state['test_end_time_idx'] = test_end_time_idx
+    st.session_state['d_bike_end'] = d_bike_end
+    
+#####################################################################################  
+    def db_correction(d_lat, radius, length):
+        # find the added distance the vehicle will travel based on R, Y, and L
+        Y = d_lat + 0.25
+        R = radius
+        db3 =R*math.acos((R-Y)/R) - math.sqrt(R*R - (R-Y)*(R-Y))
+        db_adj = length + db3
+        return db_adj
+    db_adj = db_correction(d_lat,radius, length)
+    
+    st.session_state['db_adj'] = db_adj
+    # st.write('db_adj', db_adj)
 
+
+    #create df column with db adjustment due to R,Y, and L
+    df['Vehicle bumper X position w turn correction'] = df['Vehicle bumper X position'] - db_adj
+    # create df column with relative absolute distance between bike and vehicle
+    df['ABS Separation w db adjust'] = abs(df['Vehicle bumper X position w turn correction'] - df['Front tire X position'])
+    df['Separation w db adjust']= df['Vehicle bumper X position w turn correction'] - df['Front tire X position']
+    df['Separation X (veh bumper - bike front tire)']= df['Vehicle bumper X position'] - df['Front tire X position']
+
+    
 #####################################################################################    
-    #vehicle position at the start of the corridor, start of test, and end of test
-    veh_d_corridor = df.loc[t_start_idx,'Vehicle bumper X position']-15 # the corridor starts 15m before the start of the bike
-    #find index of the start of the corridor
-    veh_corridor_idx = df.loc[(df['Vehicle bumper X position'] >= veh_d_corridor), ['Time'] ].index[0]
-    veh_t_corridor = df['Time'].iloc[veh_corridor_idx]
-    veh_d_start = df.loc[test_start_idx,'Vehicle bumper X position'] 
-    veh_d_end = df.loc[test_end_idx,'Vehicle bumper X position']
-    x_start = df['Vehicle bumper X position'].iloc[test_start_idx]
-    st.session_state['veh_t_corridor'] = veh_t_corridor
-    st.session_state['veh_d_corridor'] = veh_d_corridor
-    st.session_state['veh_d_start'] = veh_d_start
-    st.session_state['veh_d_end'] = veh_d_end
-    st.session_state['x_start'] = x_start
+# determine the transformation for a time vs distance plot as described in the documentation
+    def time_transform(df, trig_start_idx, test_end_time_idx, test_options, db):
+        if test_options == 'Test Case 4':
+            # location of bike at trigger point
+            bike_trig_location = df.loc[trig_start_idx,'Front tire X position']
+            #location of vehicle 15m before bike location
+            veh_entercorridor_time_idx = df.loc[(df['Vehicle bumper X position'] >= bike_trig_location-15), ['Time'] ].index[0]
+            veh_entercorridor_location = df.loc[veh_entercorridor_time_idx,'Vehicle bumper X position']
+            veh_trig_location = df.loc[trig_start_idx,'Vehicle bumper X position']
+            #find time index of the start of the corridor
+            veh_entercorridor_time = df['Time'].iloc[veh_entercorridor_time_idx]
+            veh_end_location = df.loc[test_end_time_idx,'Vehicle bumper X position']
+            # translate vehicle dataframe
+            df['Vehicle bumper X position trans'] = df.iloc[trig_start_idx:test_end_time_idx][['Vehicle bumper X position']].reset_index(drop=True)- (bike_trig_location+65)
+            db_delta_plus = df.loc[(df['Vehicle bumper X position trans'] >= -db + 0.5), 'Time' ].index[0]
+            db_delta_plus_time = df['Time'].iloc[db_delta_plus]
+            # print('db_delta_plus_time', db_delta_plus_time)
+            db_delta_minus = df.loc[(df['Vehicle bumper X position trans'] >= -db - 0.5), 'Time'].index[0]
+            db_delta_minus_time = df['Time'].iloc[db_delta_minus]
+            #translate bike dataframe
+            df['Front tire X position trans'] = (df.iloc[trig_start_idx:test_end_time_idx][['Front tire X position']].reset_index(drop=True))- (bike_trig_location+65)
+            #translate time dataframe
+            start_time_trans = df.loc[trig_start_idx, 'Time']
+            df['Time_trans'] = (df.iloc[trig_start_idx:test_end_time_idx][['Time']].reset_index(drop=True))-start_time_trans
+            # sync_time_trans = da_meas_time-start_time_trans
+        else: 
+            # location of bike at trigger point
+            bike_trig_location = df.loc[trig_start_idx,'Front tire X position']
+            bike_trig_time = df.loc[trig_start_idx,'Time']
+            #location of vehicle 15m before bike location
+            veh_entercorridor_time_idx = df.loc[(df['Vehicle bumper X position'] >= bike_trig_location-15), ['Time'] ].index[0]
+            veh_entercorridor_location = df.loc[veh_entercorridor_time_idx,'Vehicle bumper X position']
+            veh_trig_location = df.loc[trig_start_idx,'Vehicle bumper X position']
+            #find time index of the start of the corridor
+            veh_entercorridor_time = df['Time'].iloc[veh_entercorridor_time_idx]
+            veh_end_location = df.loc[test_end_time_idx,'Vehicle bumper X position']
+            # translate vehicle dataframe
+            df['Vehicle bumper X position trans'] = df.iloc[veh_entercorridor_time_idx:test_end_time_idx][['Vehicle bumper X position']].reset_index(drop=True)- (bike_trig_location+65)
+            db_delta_plus = df.loc[(df['Vehicle bumper X position trans'] >= -db + 0.5), 'Time' ].index[0]
+            db_delta_plus_time = df['Time'].iloc[db_delta_plus]
+            # print('db_delta_plus_time', db_delta_plus_time)
+            db_delta_minus = df.loc[(df['Vehicle bumper X position trans'] >= -db - 0.5), 'Time'].index[0]
+            db_delta_minus_time = df['Time'].iloc[db_delta_minus]
+            #translate bike dataframe
+            df['Front tire X position trans'] = (df.iloc[veh_entercorridor_time_idx:test_end_time_idx][['Front tire X position']].reset_index(drop=True))- (bike_trig_location+65)
+            #translate time dataframe
+            start_time_trans = df.loc[veh_entercorridor_time_idx, 'Time']
+            df['Time_trans'] = (df.iloc[veh_entercorridor_time_idx:test_end_time_idx][['Time']].reset_index(drop=True))-start_time_trans
+            # sync_time_trans = da_meas_time-start_time_trans   
+        return veh_trig_location, veh_entercorridor_time_idx, veh_entercorridor_location, veh_entercorridor_time, veh_end_location, start_time_trans, bike_trig_location,db_delta_plus_time,db_delta_minus_time
+        
+    veh_trig_location, veh_entercorridor_time_idx, veh_entercorridor_location, veh_entercorridor_time, veh_end_location, start_time_trans, bike_trig_location,db_delta_plus_time,db_delta_minus_time = time_transform(df, trig_start_idx, test_end_time_idx, test_options,db)
+    st.session_state['veh_entercorridor_location'] = veh_entercorridor_location
+    st.session_state['veh_entercorridor_time'] = veh_entercorridor_time
+    st.session_state['veh_entercorridor_time_idx'] = veh_entercorridor_time_idx
+    st.session_state['start_time_trans'] = start_time_trans
+    st.session_state['bike_trig_location'] = bike_trig_location
+    st.session_state['veh_trig_location'] = veh_trig_location
+    st.session_state['veh_end_location'] = veh_end_location
+    st.session_state['db_delta_plus_time'] = db_delta_plus_time
+    st.session_state['db_delta_minus_time'] = db_delta_minus_time
+#####################################################################################
+    #shift bike back to origin - some tests do not start at the origin
+
+    #find the x position of the bike
+    start_pos_bike = df['Front tire X position'][trig_start_idx-20:trig_start_idx].mean()
+    df['Front tire X position shift2origin'] = df['Front tire X position']-start_pos_bike
+    df['Separation X shift2origin (veh bumper - bike front tire)'] = df['Separation X (veh bumper - bike front tire)']-start_pos_bike
+    # trigger_idx = df.loc[(df['Separation X shift2origin (veh bumper - bike front tire)'] >= d_veh_entercorridor), ['Time'] ].index[0]
+    da_position = da_pos + start_pos_bike
+    db_position = db_pos + start_pos_bike
+    trig_position = trig_pos + start_pos_bike
+    st.session_state['da_position'] = da_position
+    st.session_state['db_position'] = db_position
+    st.session_state['trig_position'] = trig_position
+    
 
 ######################## Criteria 1, 2 ##########################################
-    def criteria_1(df, veh_corridor_idx, test_end_idx):
+    def criteria_1(df, veh_entercorridor_time_idx, test_end_time_idx):
         #find vehicle lateral distances during the test corridor
-        if df['Vehicle Lateral position'][veh_corridor_idx:test_end_idx].max()< 0.1 and df['Vehicle Lateral position'][veh_corridor_idx:test_end_idx].min()> -0.1 :
+        if df['Vehicle Lateral position'][veh_entercorridor_time_idx:test_end_time_idx].max()< 0.1 and df['Vehicle Lateral position'][veh_entercorridor_time_idx:test_end_time_idx].min()> -0.1 :
             crit_1 = True
         else:
             crit_1 = False
 
-        veh_lat_mean = df['Vehicle Lateral position'][veh_corridor_idx:test_end_idx].mean()
-        veh_lat_std = df['Vehicle Lateral position'][veh_corridor_idx:test_end_idx].std()
+        veh_lat_mean = df['Vehicle Lateral position'][veh_entercorridor_time_idx:test_end_time_idx].mean()
+        veh_lat_std = df['Vehicle Lateral position'][veh_entercorridor_time_idx:test_end_time_idx].std()
         return veh_lat_mean, veh_lat_std, crit_1
-    veh_lat_mean, veh_lat_std, crit_1 = criteria_1(df, veh_corridor_idx, test_end_idx)    
+    veh_lat_mean, veh_lat_std, crit_1 = criteria_1(df, veh_entercorridor_time_idx, test_end_time_idx)    
     st.session_state['veh_lat_mean'] = veh_lat_mean
     st.session_state['veh_lat_std'] = veh_lat_std
     st.session_state['crit_1'] = crit_1
     
-    def criteria_2(df, test_start_idx, test_end_idx,d_lat):
+    def criteria_2(df, test_start_idx, test_end_time_idx,d_lat):
         #find bike lateral distances during the test corridor
         b_lim = -d_lat
-        if df['Bike Relative Lateral position'][test_start_idx:test_end_idx].max()< 0.2+b_lim and df['Bike Relative Lateral position'][test_start_idx:test_end_idx].min()>-0.2+b_lim:
+        if df['Bike Lateral position'][test_start_idx:test_end_time_idx].max()< 0.2+b_lim and df['Bike Lateral position'][test_start_idx:test_end_time_idx].min()>-0.2+b_lim:
             crit_2 = True
         else:
             crit_2 = False
 
-        bike_lat_mean = df['Bike Relative Lateral position'][test_start_idx:test_end_idx].mean()
-        bike_lat_std = df['Bike Relative Lateral position'][test_start_idx:test_end_idx].std()
+        bike_lat_mean = df['Bike Lateral position'][test_start_idx:test_end_time_idx].mean()
+        bike_lat_std = df['Bike Lateral position'][test_start_idx:test_end_time_idx].std()
         return bike_lat_mean, bike_lat_std, crit_2
-    bike_lat_mean, bike_lat_std, crit_2= criteria_2(df, test_start_idx, test_end_idx, d_lat)    
+    bike_lat_mean, bike_lat_std, crit_2= criteria_2(df, test_start_idx, test_end_time_idx, d_lat)    
     st.session_state['bike_lat_mean'] = bike_lat_mean
     st.session_state['bike_lat_std'] = bike_lat_std
     st.session_state['crit_2'] = crit_2
 
 ######################## Criteria 3, 4, 6, 7  ##########################################
-    def criteria_3(df,veh_corridor_idx , test_start_idx):
-        # find the mean vehicle velocity in the corridor before the test starts
-        veh_vel_corr_mean = df['Vehicle forward velocity'][veh_corridor_idx:test_start_idx].mean()
-        veh_vel_corr_std = df['Vehicle forward velocity'][veh_corridor_idx:test_start_idx].std()
-        if df['Vehicle forward velocity'][veh_corridor_idx:test_start_idx].max()< veh_vel_corr_mean +2 and df['Vehicle forward velocity'][veh_corridor_idx:test_start_idx].min()> veh_vel_corr_mean -2 :
-            crit_3 = True
+    def criteria_3(df,veh_entercorridor_time_idx , trig_start_idx):
+        # find the vehicle velocity in the corridor before the test starts
+        if trig_start_idx >veh_entercorridor_time_idx:
+            veh_vel_corr_mean = df['Vehicle forward velocity'][veh_entercorridor_time_idx:trig_start_idx].mean()
+            veh_vel_corr_std = df['Vehicle forward velocity'][veh_entercorridor_time_idx:trig_start_idx].std()
+            if df['Vehicle forward velocity'][veh_entercorridor_time_idx:trig_start_idx].max()< veh_vel_corr_mean +2 and df['Vehicle forward velocity'][veh_entercorridor_time_idx:trig_start_idx].min()> veh_vel_corr_mean -2 :
+                crit_3 = True
+            else:
+                crit_3 = False
         else:
-            crit_3 = False
+            veh_vel_corr_mean = df['Vehicle forward velocity'][trig_start_idx:veh_entercorridor_time_idx].mean()
+            veh_vel_corr_std = df['Vehicle forward velocity'][trig_start_idx:veh_entercorridor_time_idx].std()
+            if df['Vehicle forward velocity'][trig_start_idx:veh_entercorridor_time_idx].max()< veh_vel_corr_mean +2 and df['Vehicle forward velocity'][trig_start_idx:veh_entercorridor_time_idx].min()> veh_vel_corr_mean -2 :
+                crit_3 = True
+            else:
+                crit_3 = False
+
         return veh_vel_corr_mean, veh_vel_corr_std, crit_3
-    veh_vel_corr_mean, veh_vel_corr_std, crit_3 = criteria_3(df, veh_corridor_idx, test_start_idx)
+    veh_vel_corr_mean, veh_vel_corr_std, crit_3 = criteria_3(df, veh_entercorridor_time_idx, trig_start_idx)
     st.session_state['veh_vel_corr_mean'] = veh_vel_corr_mean
     st.session_state['veh_vel_corr_std'] = veh_vel_corr_std
     st.session_state['crit_3'] = crit_3
 
-    def criteria_4(df, veh_corridor_idx, t_start_idx):
-        #find the mean bike velocity in the corridor before the test starts
-        bike_vel_corr_max = df['Bike forward velocity'][veh_corridor_idx:t_start_idx].max()
-        if bike_vel_corr_max < 0.1:
+    def criteria_4(df, trig_start_idx):
+        #find the bike velocity in the corridor before the test starts
+        bike_vel_corr_max = df['Bike forward velocity'][trig_start_idx-20:trig_start_idx-10].max()
+        if bike_vel_corr_max < 0.25:
             crit_4 = True
         else:
             crit_4 = False
         return bike_vel_corr_max, crit_4
-    bike_vel_corr_max, crit_4 = criteria_4(df,veh_corridor_idx,t_start_idx)
+    bike_vel_corr_max, crit_4 = criteria_4(df, trig_start_idx)
     st.session_state['bike_vel_corr_max'] = bike_vel_corr_max
     st.session_state['crit_4'] = crit_4
     
-    def criteria_6(df, test_start_idx, test_end_idx):
+    def criteria_6(df, test_start_idx, test_end_time_idx,veh_vel):
         #find the mean vehicle velocity between the start and end of test
-        veh_vel_mean = df['Vehicle forward velocity'][test_start_idx:test_end_idx].mean()
-        veh_vel_std = df['Vehicle forward velocity'][test_start_idx:test_end_idx].std()
-        if df['Vehicle forward velocity'][test_start_idx:test_end_idx].max()< veh_vel_mean +2 and df['Vehicle forward velocity'][test_start_idx:test_end_idx].min()> veh_vel_mean -2 :
+        veh_vel_mean = df['Vehicle forward velocity'][test_start_idx:test_end_time_idx].mean()
+        veh_vel_std = df['Vehicle forward velocity'][test_start_idx:test_end_time_idx].std()
+        if df['Vehicle forward velocity'][test_start_idx:test_end_time_idx].max()< veh_vel +2 and df['Vehicle forward velocity'][test_start_idx:test_end_time_idx].min()> veh_vel -2 :
             crit_6 = True
         else:
             crit_6 = False
         return veh_vel_mean, veh_vel_std, crit_6
-    veh_vel_mean, veh_vel_std, crit_6 = criteria_6(df, test_start_idx, test_end_idx)
+    veh_vel_mean, veh_vel_std, crit_6 = criteria_6(df, test_start_idx, test_end_time_idx,veh_vel)
     st.session_state['veh_vel_mean'] = veh_vel_mean
     st.session_state['veh_vel_std'] = veh_vel_std
     st.session_state['crit_6'] = crit_6
 
-    def criteria_7(df, test_start_idx, test_end_idx):
+    def criteria_7(df, test_start_idx, test_end_time_idx, bike_vel):
         # find the bicycle mean velocity between the start and end of test 
-        bike_vel_mean = df['Bike forward velocity'][test_start_idx:test_end_idx].mean()
-        bike_vel_std = df['Bike forward velocity'][test_start_idx:test_end_idx].std()
-        if df['Bike forward velocity'][test_start_idx:test_end_idx].max()< bike_vel_mean+0.5 and df['Bike forward velocity'][test_start_idx:test_end_idx].min()>bike_vel_mean-0.5 :
+        bike_vel_mean = df['Bike forward velocity'][test_start_idx:test_end_time_idx].mean()
+        bike_vel_std = df['Bike forward velocity'][test_start_idx:test_end_time_idx].std()
+        if df['Bike forward velocity'][test_start_idx:test_end_time_idx].max()< bike_vel+0.5 and df['Bike forward velocity'][test_start_idx:test_end_time_idx].min()>bike_vel-0.5 :
             crit_7 = True
         else:
             crit_7 = False
         return bike_vel_mean, bike_vel_std, crit_7
 
-    bike_vel_mean, bike_vel_std, crit_7 = criteria_7(df, test_start_idx, test_end_idx)
+    bike_vel_mean, bike_vel_std, crit_7 = criteria_7(df, test_start_idx, test_end_time_idx, bike_vel)
+
     st.session_state['bike_vel_mean'] = bike_vel_mean
     st.session_state['bike_vel_std'] = bike_vel_std
     st.session_state['crit_7'] = crit_7
     
 ######################## Criteria 5  ##########################################
     
-    def criteria_5(df, t_start_idx, test_start_idx, test_end_idx):
+    def criteria_5(df, trig_start_idx, test_start_idx):
 
         #find the time to accelerate to within 0.5 kph of final bike velocity
         
         #Reference the front tire of the bike -->front overhang + Object 1 actual X (front axle)
-        bike_d_acc_start = df.loc[t_start_idx,'Front tire X position']
-        bike_d_start = df.loc[test_start_idx,'Front tire X position']
+        d_bike_acc_start = df.loc[trig_start_idx,'Front tire X position']
+        d_bike_start = df.loc[test_start_idx,'Front tire X position']
         #what distance did it take to accelerate to start of test
-        bike_d_acc = bike_d_start - bike_d_acc_start
+        d_bike_acc = d_bike_start - d_bike_acc_start
         # what is the position of the bike at the end of the test
-        bike_d_end = df.loc[test_end_idx,'Front tire X position']
-        if bike_d_acc < 5.66 + 1 and bike_d_acc > 5.66 - 1:
+        # bike_d_end = df.loc[test_end_time_idx,'Front tire X position']
+        if d_bike_acc < 5.66 + 1 and d_bike_acc > 5.66 - 1:
             crit_5 = True
         else:
             crit_5 = False
-        return bike_d_acc, bike_d_start, bike_d_end, crit_5
-    bike_d_acc, bike_d_start, bike_d_end, crit_5 = criteria_5(df, t_start_idx, test_start_idx, test_end_idx)
-    st.session_state['bike_d_acc'] = bike_d_acc
-    st.session_state['bike_d_start'] = bike_d_start
-    st.session_state['bike_d_end'] = bike_d_end
+        return d_bike_acc, d_bike_start,crit_5
+    d_bike_acc, d_bike_start,  crit_5 = criteria_5(df, trig_start_idx, test_start_limit_idx)
+    st.session_state['d_bike_acc'] = d_bike_acc
+    st.session_state['d_bike_start'] = d_bike_start
     st.session_state['crit_5'] = crit_5
 
 ######################## Criteria 8  ##########################################
-    # find da and db
-    def criteria_8(df, t_start_idx, trig_pos):
+ 
+# find dynamic da and db based on average speed of bike and vehicle
+    
+    def da_measurement(df, d_bike_end, vel_mean_bike):
+        #definition of da
+        da_meas = 8 * vel_mean_bike/3.6
+        #location of da = collision point - da_meas = 65 - da 
+        d_da_meas = d_bike_end - da_meas
+        da_meas_time_idx = df.loc[(df['Front tire X position'] >= d_da_meas), ['Time'] ].index[0]
+        da_meas_time = df.loc[da_meas_time_idx,'Time'] 
+        return d_da_meas, da_meas_time,da_meas_time_idx
+    
+    d_da_meas, da_meas_time, da_meas_time_idx = da_measurement(df, d_bike_end, bike_vel_mean)
+    st.session_state['d_da_meas'] = d_da_meas
+    st.session_state['da_meas_time'] = da_meas_time
+    
+    d_da_endmeas = df.loc[test_end_time_idx, 'Front tire X position']
+  
+    def db_measurement(df, da_meas_time_idx):
+        d_db_meas = df.loc[da_meas_time_idx,'Vehicle bumper X position']
+        d_db_meas_dbadj = df.loc[da_meas_time_idx,'Vehicle bumper X position w turn correction']
+        return d_db_meas, d_db_meas_dbadj
+        
+    
+    d_db_meas, d_db_meas_dbadj = db_measurement(df, da_meas_time_idx)
+    st.session_state['d_db_meas'] = d_db_meas
+    st.session_state['d_db_meas_dbadj'] = d_db_meas_dbadj
+    da_db = df.loc[da_meas_time_idx,'Separation w db adjust']
+  
 
-        # position of vehicle when the bike is triggered/started
-        # da = bike location when the test starts
-        da_meas = df.loc[test_start_idx,'Front tire X position']
-        # db = position of vehicle when the bike is triggered/started
-        db_meas = df.loc[t_start_idx,'Vehicle bumper X position']
-        if trig_pos -db_meas<=1 and db_meas -trig_pos <=1:
+#####################################################################################
+    
+    def criteria_8(da, d_da_meas, db, d_db_meas ):
+        abs_meas = abs(d_da_meas - d_db_meas)
+        abs_calc = abs(da - db)
+        if abs_meas <= abs_calc + 0.5 and abs_meas >= abs_calc - 0.5:
             crit_8 = True
         else:
             crit_8 = False
-        return da_meas, db_meas, crit_8
+        return crit_8, abs_meas, abs_calc
     
-    da_meas, db_meas, crit_8 = criteria_8(df, t_start_idx, trig_pos)
-    st.session_state['da_meas'] = da_meas
-    st.session_state['db_meas'] = db_meas
+    crit_8,abs_meas, abs_calc = criteria_8(da, d_da_meas, db, d_db_meas)
     st.session_state['crit_8'] = crit_8
 
 ################################################################################
-    Veh_collision_pt = df.loc[test_end_idx,'Vehicle bumper X position']
-
-    LPI = df.loc[test_end_idx,'Vehicle bumper X position'] -15   # will need to change 15 for speeds outside of test criteria
-    LPI_time_idx = df.loc[(df['Vehicle bumper X position'] >= LPI), ['Time'] ].index[0]
-    LPI_time = df.loc[LPI_time_idx, 'Time']
-    LPI_Frame = df.loc[LPI_time_idx, 'FrameID']
-
-    FPI = df.loc[test_end_idx,'Vehicle bumper X position'] -(15 + (4*veh_vel_mean/3.6) + (6-length))
-    FPI_time_idx = df.loc[(df['Vehicle bumper X position'] >= FPI), ['Time'] ].index[0]
-    FPI_time = df.loc[FPI_time_idx, 'Time']
-    FPI_Frame = df.loc[FPI_time_idx, 'FrameID']
+    Veh_collision_pt = df.loc[test_end_time_idx,'Vehicle bumper X position']
+    Bike_collision_pt = df.loc[test_end_time_idx,'Front tire X position']
     
+    # Find LPI and FPI
+    def LPI_calc(df, dc, test_end_time_idx):
+        LPI = df.loc[test_end_time_idx,'Vehicle bumper X position'] - dc   
+        LPI_time_idx = df.loc[(df['Vehicle bumper X position'] >= LPI), ['Time'] ].index[0]
+        LPI_time = df.loc[LPI_time_idx, 'Time']
+        LPI_Frame = df.loc[LPI_time_idx, 'FrameID']
+        return LPI, LPI_time_idx, LPI_time, LPI_Frame
+    LPI, LPI_time_idx, LPI_time, LPI_Frame = LPI_calc(df, dc, test_end_time_idx)
+
+    def FPI_calc(df, dd, test_end_time_idx):
+        FPI = df.loc[test_end_time_idx,'Vehicle bumper X position'] - dd 
+        FPI_time_idx = df.loc[(df['Vehicle bumper X position'] >= FPI), ['Time'] ].index[0]
+        FPI_time = df.loc[FPI_time_idx, 'Time']
+        FPI_Frame = df.loc[FPI_time_idx, 'FrameID']
+        return FPI, FPI_time_idx, FPI_time, FPI_Frame
+    FPI, FPI_time_idx, FPI_time, FPI_Frame = FPI_calc(df, dd, test_end_time_idx)
+
     st.session_state['Veh_collision_pt'] = Veh_collision_pt
     st.session_state['LPI'] = LPI
     st.session_state['LPI_time_idx'] = LPI_time_idx
@@ -437,149 +573,13 @@ if uploaded_file:
     st.session_state['FPI_Frame'] = FPI_Frame
 
     ################################################################################################################################################       
-    ################################################################################################################################################
-    # Sync point of da and db
-
+   
     # find the relative da and db sync point in the data
     # find the determined synd pt in meters from the front tire of the bike and bumper of vehicle
-    da_db_sync_distance = (da-db)
-
-    st.session_state['da_db_distance'] = da_db_sync_distance
-    # st.write('Sync Distance = da - db', round(da_db_sync_distance,2))
-
-    def db_correction(d_lat, radius, length):
-        # find the added distance the vehicle will travel based on R, Y, and L
-        Y = d_lat + 0.25
-        R = radius
-        db3 =R*math.acos((R-Y)/R) - math.sqrt(R*R - (R-Y)*(R-Y))
-        db_adj = length + db3
-        return db_adj
-    db_adj = db_correction(d_lat,radius, length)
+    da_db_distance = (da-db)
+    st.session_state['da_db_distance'] = da_db_distance
+    # st.write('Distance = da - db', round(da_db_distance,2))
     
-    st.session_state['db_adj'] = db_adj
+    ################################################################################################################################################       
 
-    #create df column with db adjustment due to R,Y, and L
-    df['Vehicle bumper X position w turn correction'] = df['Vehicle bumper X position'] - db_adj
-    # create df column with relative absolute distance between bike and vehicle
-    df['ABS Separation w db adjust'] = abs(df['Vehicle bumper X position w turn correction'] - df['Front tire X position'])
-    df['Separation w db adjust']= df['Vehicle bumper X position w turn correction'] - df['Front tire X position']
-    df['Separation w/o db adjust']= df['Vehicle bumper X position'] - df['Front tire X position']
-
-    # find indexes where sync distance is within specifications +/- 0.5 meters
-    l_lim = da_db_sync_distance - 0.5
-    u_lim = da_db_sync_distance + 0.5
-
-    # dadbsync = df[(df['Separation w/o db adjust'] >= l_lim) & (df['Separation w/o db adjust'] <= u_lim) & (df['Bike forward velocity'] >= bike_vel-0.5)]
-    
-    dadbsync = df[(df['Separation w db adjust'] >= l_lim) & (df['Separation w db adjust'] <= u_lim) & (df['Bike forward velocity'] >= bike_vel-0.5)]
-    st.session_state['dadbsync'] = dadbsync
-
-    if dadbsync.empty:
-        st.warning('No valid sync distance found with d_a and d_b', icon="⚠️")
-        st.markdown("<h1 style='color: red;'>Proceed to Troubleshoot Guide Page</h1>", unsafe_allow_html=True)
-    else:
-        # first location of sync points
-        test_start_idx_sync = dadbsync['Time'].idxmin()
-
-        test_start_sync = df.loc[test_start_idx_sync, 'Time']
-
-        st.session_state['test_start_idx_sync'] = test_start_idx_sync
-        st.session_state['test_start_sync'] = test_start_sync
-        
-        #collision time is 8 seconds after the start of the test
-        test_end_sync = test_start_sync+8
-        test_end_idx_sync = df.loc[(df['Time'] >= test_end_sync), ['Time'] ].index[0]
-        st.session_state['test_end_idx_sync'] = test_end_idx_sync
-        st.session_state['test_end_sync'] = test_end_sync
-
-        # verify that sync points are valid
-        max_idx = df['Time'].idxmax()
-        if test_end_idx_sync > max_idx:
-            st.markdown("<h1 style='text-align: center; color: red;'>No valid Sync time found!!!!</h1>", unsafe_allow_html=True)
-        else:
-            
-            #find da db sync mid point
-            da_db_sync_vehicle = df.loc[test_start_idx_sync, 'Vehicle bumper X position']+0.5
-            da_db_sync_bike = df.loc[test_start_idx_sync, 'Front tire X position']+0.5
-            st.session_state['da_db_sync_vehicle'] = da_db_sync_vehicle
-            st.session_state['da_db_sync_bike'] = da_db_sync_bike
-            
-            #find location of bike and vehicle when bike reaches spec velocity
-            vehicle_start = df.loc[test_start_idx, 'Vehicle bumper X position']
-            bike_start = df.loc[test_start_idx, 'Front tire X position']
-            
-            #find da and db sync locations
-            da_meas_sync = da_db_sync_bike - bike_start
-            db_meas_sync = da_db_sync_vehicle - vehicle_start
-            st.session_state['da_meas_sync'] = da_meas_sync
-            st.session_state['db_meas_sync'] = db_meas_sync
-
-        #####################################################################################    
-            #vehicle position at the start of test, and end of test
-            
-            veh_d_start_sync = df.loc[test_start_idx_sync,'Vehicle bumper X position'] 
-            veh_d_end_sync = df.loc[test_end_idx_sync,'Vehicle bumper X position']
-    
-            st.session_state['veh_d_start_sync'] = veh_d_start_sync
-            st.session_state['veh_d_end_sync'] = veh_d_end_sync
-
-        ######################## Criteria 1, 2 ##########################################
-          
-            veh_lat_mean_sync, veh_lat_std_sync, crit_1_sync = criteria_1(df, veh_corridor_idx, test_end_idx_sync)    
-            st.session_state['veh_lat_mean_sync'] = veh_lat_mean_sync
-            st.session_state['veh_lat_std_sync'] = veh_lat_std_sync
-            st.session_state['crit_1_sync'] = crit_1_sync
-
-            bike_lat_mean_sync, bike_lat_std_sync, crit_2_sync = criteria_2(df, test_start_idx_sync, test_end_idx_sync, d_lat)
-            st.session_state['bike_lat_mean_sync'] = bike_lat_mean_sync
-            st.session_state['bike_lat_std_sync'] = bike_lat_std_sync
-            st.session_state['crit_2_sync'] = crit_2_sync
-
-        ######################## Criteria 3, 4, 6, 7  ##########################################
-            
-            veh_vel_corr_mean_sync, veh_vel_corr_std_sync, crit_3_sync = criteria_3(df, veh_corridor_idx, test_start_idx_sync)
-            st.session_state['veh_vel_corr_mean_sync'] = veh_vel_corr_mean_sync
-            st.session_state['veh_vel_corr_std_sync'] = veh_vel_corr_std_sync
-            st.session_state['crit_3_sync'] = crit_3_sync
-
-            # same as non sync criteria 4
-            
-            veh_vel_mean_sync, veh_vel_std_sync, crit_6_sync = criteria_6(df, test_start_idx_sync, test_end_idx_sync)
-            st.session_state['veh_vel_mean_sync'] = veh_vel_mean_sync
-            st.session_state['veh_vel_std_sync'] = veh_vel_std_sync
-            st.session_state['crit_6_sync'] = crit_6_sync
-
-            bike_vel_mean_sync, bike_vel_std_sync, crit_7_sync = criteria_7(df, test_start_idx_sync, test_end_idx_sync)
-            st.session_state['bike_vel_mean_sync'] = bike_vel_mean_sync
-            st.session_state['bike_vel_std_sync'] = bike_vel_std_sync
-            st.session_state['crit_7_sync'] = crit_7_sync
-
-        ######################## Criteria 5  ##########################################
-            # same as non sync criteria 5
-
-        ######################## Criteria 8  ##########################################
-            # by definition a sync point has been found
-            
-        #####################################################################################
-            Veh_collision_pt_sync = df.loc[test_end_idx_sync,'Vehicle bumper X position']
-
-            LPI_sync = df.loc[test_end_idx_sync,'Vehicle bumper X position'] -15   # will need to change 15 for speeds outside of test criteria
-            LPI_time_idx_sync = df.loc[(df['Vehicle bumper X position'] >= LPI_sync), ['Time'] ].index[0]
-            LPI_time_sync = df.loc[LPI_time_idx_sync, 'Time']
-            LPI_Frame_sync = df.loc[LPI_time_idx_sync, 'FrameID']
-
-            FPI_sync = df.loc[test_end_idx_sync,'Vehicle bumper X position'] -(15 + (4*veh_vel_mean_sync/3.6) + (6-length))
-            FPI_time_idx_sync = df.loc[(df['Vehicle bumper X position'] >= FPI_sync), ['Time'] ].index[0]
-            FPI_time_sync = df.loc[FPI_time_idx_sync, 'Time']
-            FPI_Frame_sync = df.loc[FPI_time_idx_sync, 'FrameID']
-
-            st.session_state['Veh_collision_pt_sync'] = Veh_collision_pt_sync
-            st.session_state['LPI_sync'] = LPI_sync
-            st.session_state['LPI_time_idx_sync'] = LPI_time_idx_sync
-            st.session_state['LPI_time_sync'] = LPI_time_sync
-            st.session_state['LPI_Frame_sync'] = LPI_Frame
-            st.session_state['FPI_sync'] = FPI_sync
-            st.session_state['FPI_time_idx_sync'] = FPI_time_idx_sync
-            st.session_state['FPI_time_sync'] = FPI_time_sync
-            st.session_state['FPI_Frame_sync'] = FPI_Frame_sync
-            
+   
