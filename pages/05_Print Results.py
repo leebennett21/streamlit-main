@@ -159,7 +159,6 @@ def create_report(filename = "Test_report.pdf"):
     #first page
     pdf.add_page()
     pdf.set_font('Arial', 'B', 12)
-
     pdf.image("sensata.jpeg", Width-60, 0,  Width/4)
     pdf.set_xy(Width-80, 10)
     pdf.cell(40,10, f'Report generated on {formatted_time}', ln=1)
@@ -217,6 +216,8 @@ def create_report(filename = "Test_report.pdf"):
     FPI_and_LPI_pdf()
     #page 2 of the results
     pdf.add_page()
+    pdf.set_font('Arial', 'B', 12)
+    pdf.image("sensata.jpeg", Width-60, 0,  Width/4)
     pdf.set_font('Arial', 'B', 20)
     pdf.cell(0, 20, txt = 'Plot Illustrating Criteria 1 and 2', align='C')
     pdf.image("plot1.jpeg", 0, 30, Width )
@@ -227,15 +228,21 @@ def create_report(filename = "Test_report.pdf"):
 
     #page 3 of the results
     pdf.add_page()
+    pdf.set_font('Arial', 'B', 12)
+    pdf.image("sensata.jpeg", Width-60, 0,  Width/4)
+    pdf.set_font('Arial', 'B', 20)
     pdf.cell(0, 20, txt = 'Position Plot Illustrating Criteria 8', align='C')
     pdf.image("plot3.jpeg", 0, 30, Width )
     pdf.ln()
     pdf.set_xy(10, Height/2)
     pdf.cell(0, 20, txt = 'Time Plot Illustrating Criteria 8', align='C')
     pdf.image("plot4.jpeg", 0, 20+ Height/2, Width)
-    
+
     #page 4 of the results
     pdf.add_page()
+    pdf.set_font('Arial', 'B', 12)
+    pdf.image("sensata.jpeg", Width-60, 0,  Width/4)
+    pdf.set_font('Arial', 'B', 20)
     pdf.cell(0, 20, txt = 'Zoomed in Time Plot Illustrating Criteria 8', align='C')
     pdf.image("plot6.jpeg", 0, 30, Width )
     pdf.ln()
