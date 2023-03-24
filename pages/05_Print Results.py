@@ -175,7 +175,7 @@ def create_report(filename = "Test_report.pdf"):
     # pdf.cell(40, 10,f'File name:  {split_filename}')
     # pdf.cell(42, 10, f'Generated on {formatted_time}')
     pdf.image("plot5.jpeg", 0, 60, Width/2)
-    pdf.image("Criteria.jpg", Width/2, 60, Width/2 -5)
+    # pdf.image("Criteria.jpg", Width/2, 60, Width/2 -5)
     pdf.ln()
     pdf.ln()
     pdf.ln()
