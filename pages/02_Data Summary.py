@@ -6,9 +6,8 @@ import plotly.io as pio
 pio.kaleido.scope.default_format = "jpeg"
 pio.kaleido.scope.default_width = 1000
 pio.kaleido.scope.default_height = 500
-
 st.set_page_config(
-     page_title="Troubleshoot Guide",
+     page_title="Data Summary",
      layout="wide",
      initial_sidebar_state="expanded",
      page_icon = ':hospital:',
@@ -27,9 +26,9 @@ dc = st.session_state['dc']
 dd = st.session_state['dd']
 length = st.session_state['length']
 radius = st.session_state['radius']
-da_pos = st.session_state['da_pos']
-db_pos = st.session_state['db_pos']
-trig_pos = st.session_state['trig_pos']
+da_position = st.session_state['da_position']
+db_position = st.session_state['db_position']
+trig_position = st.session_state['trig_position']
     
 df = st.session_state['df']
 testfile = st.session_state['Test File']
@@ -37,19 +36,21 @@ db_adj = st.session_state['db_adj']
 da_db_distance = st.session_state['da_db_distance']
 # da_db_sync_mid_point = st.session_state['da_db_sync_mid_point']
 b_lim = st.session_state['b_lim']
-t_start_idx = st.session_state['t_start_idx']
+# t_start_idx = st.session_state['t_start_idx']
 t_start = st.session_state['t_start']
 test_start = st.session_state['test_start']
 test_start_idx = st.session_state['test_start_idx']
-test_end = st.session_state['test_end']
-test_end_idx = st.session_state['test_end_idx']
+test_end_time = st.session_state['test_end_time']
+test_end_time_idx = st.session_state['test_end_time_idx']
+test_start_limit_idx = st.session_state['test_start_limit_idx']
+test_start_limit = st.session_state['test_start_limit']
 
 ######################## Criteria 1, 2 ##########################################
 #vehicle position at the start of the corridor, start of test, and end of test
-veh_t_corridor = st.session_state['veh_t_corridor']
-veh_d_corridor = st.session_state['veh_d_corridor']
-veh_d_start = st.session_state['veh_d_start']
-veh_d_end = st.session_state['veh_d_end']
+veh_entercorridor_time = st.session_state['veh_entercorridor_time']
+# veh_d_corridor = st.session_state['veh_d_corridor']
+# veh_d_start = st.session_state['veh_d_start']
+# veh_d_end = st.session_state['veh_d_end']
 veh_lat_mean = st.session_state['veh_lat_mean']
 veh_lat_std = st.session_state['veh_lat_std']
 bike_lat_mean = st.session_state['bike_lat_mean']
@@ -70,31 +71,41 @@ crit_4= st.session_state['crit_4']
 crit_6= st.session_state['crit_6']
 crit_7= st.session_state['crit_7']
 ######################## Criteria 5 ##########################################
-bike_d_acc = st.session_state['bike_d_acc']
-bike_d_start = st.session_state['bike_d_start']
-bike_d_end =st.session_state['bike_d_end']
+d_bike_acc = st.session_state['d_bike_acc']
+d_bike_start = st.session_state['d_bike_start']
+d_bike_end =st.session_state['d_bike_end']
 crit_5= st.session_state['crit_5']
 ######################## Criteria 8 ##########################################
-da_meas = st.session_state['da_meas']
-db_meas = st.session_state['db_meas']
+d_da_meas = st.session_state['d_da_meas']
+d_db_meas = st.session_state['d_db_meas']
+d_db_meas_dbadj = st.session_state['d_db_meas_dbadj']
+da_meas_time = st.session_state['da_meas_time']
+
 crit_8= st.session_state['crit_8']
-#find lateral distances during test
-
-# t_bike_acc = st.session_state['t_bike_acc']
-bike_d_acc = st.session_state['bike_d_acc']
-#first point of info and last point of info
-
+##############################################################################
+#what is the last point and first point of information
 Veh_collision_pt = st.session_state['Veh_collision_pt']
 LPI = st.session_state['LPI']
 LPI_time_idx = st.session_state['LPI_time_idx']
 LPI_time = st.session_state['LPI_time']
+LPI_Frame = st.session_state['LPI_Frame']
 FPI = st.session_state['FPI']
 FPI_time_idx = st.session_state['FPI_time_idx']
 FPI_time = st.session_state['FPI_time'] 
+FPI_Frame = st.session_state['FPI_Frame']
+##############################################################################
 
 #position of vehicle bumper when the bike has reached test velocity
-x_start  = st.session_state['x_start']
-
+veh_entercorridor_time = st.session_state['veh_entercorridor_time']
+veh_end_location = st.session_state['veh_end_location']
+veh_entercorridor_location = st.session_state['veh_entercorridor_location']
+veh_entercorridor_time = st.session_state['veh_entercorridor_time']
+start_time_trans = st.session_state['start_time_trans']
+bike_trig_location = st.session_state['bike_trig_location']
+veh_trig_location = st.session_state['veh_trig_location']
+db_delta_plus_time = st.session_state['db_delta_plus_time']
+db_delta_minus_time = st.session_state['db_delta_minus_time']
+##############################################################################
 def pass_or_fail(criteria, crit_number):
     if criteria == True:
         pass_crit = f"""<p style="font-family:sans-serif; color:Green; font-size: 28px;">Test Criteria {crit_number} = **PASS**</p>"""
@@ -103,7 +114,7 @@ def pass_or_fail(criteria, crit_number):
         fail_crit = f"""<p style="font-family:sans-serif; color:Red; font-size: 28px;">Test Criteria {crit_number} = **FAIL**</p>"""
         st.markdown(fail_crit, unsafe_allow_html=True)
 
-test_file = f"""<p style="font-family:sans-serif; text-align: Center; color:Black; font-size: 38px;">{test_options}</p>"""
+test_file = f"""<p style="font-family:sans-serif; text-align: Center; color:Black; font-size: 38px;">{test_options} : Data Summary</p>"""
 st.markdown(test_file, unsafe_allow_html=True)
 # st.write('Test file:' , testfile.name)    
 columns = st.columns((6,1,6))
@@ -126,11 +137,29 @@ with columns[0]:
     pass_or_fail(crit_4, 4)    
     st.write('Bike max velocity in corridor before start of test (km/h):', round(bike_vel_corr_max,2))
     st.write('---')
+    #dsiplay FPI and LPI frame numbers
+    if dd > 0:
+        FPIframe = f"""<p style="font-family:sans-serif; color:Green; font-size: 21px;">FPI Frame # : {FPI_Frame}</p>"""
+        st.markdown(FPIframe, unsafe_allow_html=True)
+        LPIframe = f"""<p style="font-family:sans-serif; color:Green; font-size: 21px;">LPI Frame # : {LPI_Frame}</p>"""
+        st.markdown(LPIframe, unsafe_allow_html=True)
+        st.write('Number of Frames between LPI and FPI:', LPI_Frame-FPI_Frame)
+        if LPI_Frame-FPI_Frame <10:
+            warningframe = f"""<p style="font-family:sans-serif; color:Red; font-size: 32px;">!! Warning !! Check FrameID</p>"""
+            st.markdown(warningframe, unsafe_allow_html=True)
+    else:
+        FPIframe = f"""<p style="font-family:sans-serif; color:Green; font-size: 21px;">FPI Frame # : None - dwell case</p>"""
+        st.markdown(FPIframe, unsafe_allow_html=True)
+        LPIframe = f"""<p style="font-family:sans-serif; color:Green; font-size: 21px;">LPI Frame # : {LPI_Frame}</p>"""
+        st.markdown(LPIframe, unsafe_allow_html=True)
 
+    
+    
 with columns[2]:
     pass_or_fail(crit_5, 5)
     st.write('Bicycle- Time to accelerate to Test Velocity (s):' ,  round(test_start-t_start,2))
-    st.write('Bicycle- Distance to accelerate to Test Velocity (m):' , round(bike_d_acc,2))
+    st.write('Bicycle- Distance to accelerate to Test Velocity (m):' , round(d_bike_acc,2))
+    # st.write('The bike start has a ', round(test_start-t_start, 1),' second bounce')
     st.write('---')
    
     pass_or_fail(crit_6, 6)
@@ -144,67 +173,24 @@ with columns[2]:
     st.write('---')
 
     pass_or_fail(crit_8, 8)
-    if trig_pos-db_meas > 2:
-        st.write('Location of Vehicle at Trigger pt (m):' , 'Calc -->', round(trig_pos, 2), 'Actual -->', round(db_meas,2))
-        st.write('Bicycle is triggered :', round(trig_pos-db_meas,2), 'meters to early')
+    if trig_position-veh_trig_location > 2:
+        st.write('Location of Vehicle at Trigger pt (m):' , 'Calc -->', round(trig_position, 2), 'Actual -->', round(veh_trig_location,2))
+        st.write('Bicycle is triggered :', round(trig_position-veh_trig_location,2), 'meters to early')
 
-    elif db_meas -trig_pos > 2:
-        st.write('Location of Vehicle at Trigger pt (m):' , 'Calc -->', round(trig_pos, 2), 'Actual -->', round(db_meas,2))
-        st.write('Bicycle is triggered :', round(db_meas-trig_pos,2), 'meters to late')
+    elif veh_trig_location -trig_position > 2:
+        st.write('Location of Vehicle at Trigger pt (m):' , 'Calc -->', round(trig_position, 2), 'Actual -->', round(veh_trig_location,2))
+        st.write('Bicycle is triggered :', round(veh_trig_location-trig_position,2), 'meters to late')
         st.write('---')
+    else:
+        st.write('Location of Vehicle at Trigger pt (m):' , 'Calc -->', round(trig_position, 2), 'Actual -->', round(veh_trig_location,2))
+        # st.write('---')
+    st.write('da_calc', round(da_position,2), 'da_actual', round(d_da_meas,2))
+    st.write('db_calc', round(db_position,2), 'db_actual', round(d_db_meas,2))        
     st.write('---')
 
 ################################################################################################### 
 
-values = [['Criteria 1', 'Criteria 2', 'Criteria 3', 'Criteria 4', 'Criteria 5', 'Criteria 6', 'Criteria 7','Criteria 8'], #1st col
-  [crit_1,  crit_2,  crit_3,  crit_4,  crit_5, crit_6,  crit_7,  crit_8], # 2nd column
-  ] # 3rd column]
 
-
-fig = go.Figure(data=[go.Table(
-  columnorder = [1,2],
-  columnwidth = [100,100],
-  header = dict(
-    values = [['<b>Test Criteria</b>'],
-                  ['<b>Pass or Fail</b>'],
-                  ],
-    line_color='darkslategray',
-    fill_color='royalblue',
-    align=['center','center'],
-    font=dict(color='white', size=12),
-    height=40
-  ),
-  cells=dict(
-    values=values,
-    line_color='darkslategray',
-    fill=dict(color=['paleturquoise', 'lightgreen']),
-    align=['left', 'center'],
-    font_size=12,
-    height=30)
-    )
-])
-
-st.write(fig)
-
-
-
-# colors = ['rgb(239, 243, 255)', 'rgb(189, 215, 231)', 'rgb(107, 174, 214)',
-#           'rgb(49, 130, 189)', 'rgb(8, 81, 156)']
-# data = {'Year' : [2010, 2011, 2012, 2013, 2014], 'Color' : colors}
-# df = pd.DataFrame(data)
-
-# fig = go.Figure(data=[go.Table(
-#   header=dict(
-#     values=["Color", "<b>YEAR</b>"],
-#     line_color='white', fill_color='white',
-#     align='center', font=dict(color='black', size=12)
-#   ),
-#   cells=dict(
-#     values=[df.Color, df.Year],
-#     line_color=[df.Color], fill_color=[df.Color],
-#     align='center', font=dict(color='black', size=11)
-#   ))
-# ])
 st.markdown("<h1 style='text-align: center; color: black;'>Lateral Relative Distances and Tolerances</h1>", unsafe_allow_html=True)
 ###################################################################################################
 # Provide easy access to criteria being tested
@@ -214,83 +200,34 @@ with expander:
     st.caption('**Criteria 2:**	*Lateral deviation:*  Target VRU must not deviate beyond +/- 0.2 m from the test path d_Path_Lateral m to the nearside (right) edge of the Ego Vehicle while the Target VRU is between the BICYCLE START LINE and the COLLISION LINE.')
 
 ###################################################################################################
-# display test parameters
-columns = st.columns((1,1,1))
 # display pass or fail test criteria
-with columns[1]:
-    if crit_1 == True:
 
-        pass_crit1 = '<p style="font-family:sans-serif; text-align: center; color:Green; font-size: 28px;">Vehicle Criteria 1 = **PASS**</p>'
-        st.markdown(pass_crit1, unsafe_allow_html=True)
-        
-    else:
-        fail_crit1 = '<p style="font-family:sans-serif; text-align: center; color:Red; font-size: 28px;">Vehicle Criteria 1 = **FAIL**</p>'
-        st.markdown(fail_crit1, unsafe_allow_html=True)
-        
-    if crit_2 == True:
-        pass_crit2 = '<p style="font-family:sans-serif; text-align: center; color:Green; font-size: 28px;">Bike Criteria 2 = **PASS**</p>'
-        st.markdown(pass_crit2, unsafe_allow_html=True)
-        
-    else:
-        fail_crit2 = '<p style="font-family:sans-serif; text-align: center; color:Red; font-size: 28px;">Bike Criteria 2 = **FAIL**</p>'
-        st.markdown(fail_crit2, unsafe_allow_html=True)
-        
+if crit_1 == True:
+
+    pass_crit1 = '<p style="font-family:sans-serif; text-align: center; color:Green; font-size: 28px;">Vehicle Criteria 1 = **PASS**</p>'
+    st.markdown(pass_crit1, unsafe_allow_html=True)
+    
+else:
+    fail_crit1 = '<p style="font-family:sans-serif; text-align: center; color:Red; font-size: 28px;">Vehicle Criteria 1 = **FAIL**</p>'
+    st.markdown(fail_crit1, unsafe_allow_html=True)
+    
+if crit_2 == True:
+    pass_crit2 = '<p style="font-family:sans-serif; text-align: center; color:Green; font-size: 28px;">Bike Criteria 2 = **PASS**</p>'
+    st.markdown(pass_crit2, unsafe_allow_html=True)
+    
+else:
+    fail_crit2 = '<p style="font-family:sans-serif; text-align: center; color:Red; font-size: 28px;">Bike Criteria 2 = **FAIL**</p>'
+    st.markdown(fail_crit2, unsafe_allow_html=True)
+    
 
 
 st.markdown('---')
 ###################################################################################################
 # plot lateral positions
-columns = st.columns((4,1,1,6))
-with columns[0]:
-
-		fig = px.line(df, x='Time', y=['Vehicle Lateral position','Bike Relative Lateral position'])
-
-		fig.update_xaxes(title_text='Time (s)',
-                        minor_ticks="outside", 
-                        showgrid=True, 
-                        gridwidth=1, 
-                        gridcolor='LightGreen')
-
-		fig.update_yaxes(title_text='Lateral Distance (m)', 
-                        minor_ticks="outside", 
-                        showgrid=True, 
-                        gridwidth=1, 
-                        gridcolor='LightGreen')
-
-		fig.add_vline(x=test_start,line_width=1, line_dash="dash", line_color="green")
-		fig.add_vline(x=test_end,line_width=1, line_dash="dash", line_color="red")
-		fig.add_vline(x=veh_t_corridor,line_width=1, line_dash="dash", line_color="red")
-		fig.add_hline(y=0.1,line_width=1, line_dash="dash", line_color="blue")
-		fig.add_hline(y=-0.1,line_width=1, line_dash="dash", line_color="blue")
-		fig.add_hline(y=0.2+b_lim,line_width=1, line_dash="dash", line_color="red")
-		fig.add_hline(y=-0.2+b_lim,line_width=1, line_dash="dash", line_color="red")
-		fig.add_annotation(x=test_start, y=1,
-                    text="Start of Test",
-                    showarrow=True,
-                    arrowhead=1)
-		fig.add_annotation(x=test_end, y=1,
-                    text="Simulated Collision",
-                    showarrow=True,
-                    arrowhead=1)
-		fig.add_annotation(x=veh_t_corridor, y=1,
-                text="Start of Corridor",
-                showarrow=True,
-                arrowhead=1)                                
-		fig.update_layout({'title':{'text': 'Lateral Distance of Vehicle and Bicycle Path', 
-                            'x':0.5, 'y':0.95, 
-                            'font_size':20, 
-                            'font_color':'red'}},
-                 showlegend=True)
-		fig.update_layout(legend=dict(
-        yanchor="top",
-        y=0.99,
-        xanchor="right",
-        x=0.99
-        )) 
-		st.plotly_chart(fig)
-with columns[3]:
-    fig = px.line(df[test_start_idx:test_end_idx], x='Time', y=['Vehicle Lateral position','Bike Relative Lateral position'])
-
+placeholder = st.empty()
+with placeholder.container():
+    fig = px.line(df, x='Time', y=['Vehicle Lateral position','Bike Lateral position'],color_discrete_sequence = ['navy', 'darkorange'])
+    # fig.add_vline(x=veh_entercorridor_time,line_width=1, line_dash="dash", line_color="red")
     fig.update_xaxes(title_text='Time (s)',
                     minor_ticks="outside", 
                     showgrid=True, 
@@ -303,26 +240,39 @@ with columns[3]:
                     gridwidth=1, 
                     gridcolor='LightGreen')
 
-    fig.add_vline(x=test_start,line_width=1, line_dash="dash", line_color="green")
-    fig.add_vline(x=test_end,line_width=1, line_dash="dash", line_color="red")
+    fig.add_vline(x=t_start,line_width=1, line_dash="dash", line_color="green")
+    fig.add_vline(x=test_end_time,line_width=1, line_dash="dash", line_color="red")
     fig.add_hline(y=0.1,line_width=1, line_dash="dash", line_color="blue")
     fig.add_hline(y=-0.1,line_width=1, line_dash="dash", line_color="blue")
     fig.add_hline(y=0.2+b_lim,line_width=1, line_dash="dash", line_color="red")
     fig.add_hline(y=-0.2+b_lim,line_width=1, line_dash="dash", line_color="red")
-    fig.add_annotation(x=test_start, y=1,
-                text="Start of Test",
+    fig.add_annotation(x=t_start, y=-.5,
+                text="Start of Bicycle",
                 showarrow=True,
                 arrowhead=1)
-    fig.add_annotation(x=test_end, y=1,
+    # fig.add_annotation(x=veh_entercorridor_time, y=-1,
+    #         text="Start of Corridor",
+    #         showarrow=True,
+    #         arrowhead=1)                            
+    fig.add_annotation(x=test_end_time, y=-1,
                 text="Simulated Collision",
                 showarrow=True,
                 arrowhead=1)
-    fig.update_layout({'title':{'text': 'Lateral Distance of Vehicle and Bicycle from Start to Collision', 
-                            'x':0.5, 'y':0.95, 
-                            'font_size':20, 
-                            'font_color':'red'}},
-                 showlegend=False)
-    st.plotly_chart(fig)
+    fig.update_layout({'title':{'text': 'Lateral Distance of Vehicle and Bicycle over Time', 
+                        'x':0.5, 'y':0.95, 
+                        'font_size':20, 
+                        'font_color':'red'}},
+                legend_title="",         
+                showlegend=True)
+    fig.update_layout(legend=dict(
+    yanchor="top",
+    y=0.99,
+    xanchor="left",
+    x=0.01
+    ))
+    my_saved_image = "plot1.jpeg"
+    pio.write_image(fig, my_saved_image)  
+    st.plotly_chart(fig, use_container_width=True)
 
 st.markdown('---')
 
@@ -337,7 +287,8 @@ with expander:
     st.caption('**Criteria 4:**	*Speed initiation:*  If the CORRIDOR LINE is nearer than the BICYCLE TRIGGER LINE to the front edge of the Ego Vehicle, then the Target VRU must maintain 0.0 km/h while the front edge fo the Ego Vehicle is between the CORRIDOR LINE and the BICYCLE TRIGGER LINE.')
     st.caption('**Criteria 6:** *Speed maintenance:*  Ego Vehicle must maintain V_EGO km/h +/- 2 km/h until reaching  the TEST STOP LINE (not fully specified by Reg 151)')
     st.caption('**Criteria 7:** *Speed maintenance:*  Target VRU must maintain V_TRGT km/h +/- 0.5 km/h until reaching  the TEST STOP LINE (not fully specified by Reg 151)')
- 
+
+    
 ###################################################################################################
 # display pass or fail test criteria
 if crit_3 == True:
@@ -357,11 +308,11 @@ else:
     st.markdown(fail_crit, unsafe_allow_html=True)
 
 if crit_6 == True:
-    pass_crit = '<p style="font-family:sans-serif; text-align: center; color:Green; font-size: 28px;">Bike Criteria 6 = **PASS**</p>'
+    pass_crit = '<p style="font-family:sans-serif; text-align: center; color:Green; font-size: 28px;">Vehicle Criteria 6 = **PASS**</p>'
     st.markdown(pass_crit, unsafe_allow_html=True)
 
 else:
-    fail_crit = '<p style="font-family:sans-serif; text-align: center; color:Red; font-size: 28px;">Bike Criteria 6 = **FAIL**</p>'
+    fail_crit = '<p style="font-family:sans-serif; text-align: center; color:Red; font-size: 28px;">Vehicle Criteria 6 = **FAIL**</p>'
     st.markdown(fail_crit, unsafe_allow_html=True)
 
 if crit_7 == True:
@@ -375,46 +326,39 @@ else:
 
 ###################################################################################################
 # plot velocity test parameters
-columns = st.columns((6,1,6))
-with columns[0]:
-    fig = px.line(df, x='Time', y=['Vehicle forward velocity', 'Bike forward velocity'])
-    fig.add_vline(x=test_start,line_width=1, line_dash="dash", line_color="green")
-    fig.add_vline(x=test_end,line_width=1, line_dash="dash", line_color="red")
-    fig.add_vline(x=veh_t_corridor,line_width=1, line_dash="dash", line_color="red")
-    fig.add_hline(y=2+veh_vel_mean,line_width=1, line_dash="dash", line_color="blue")
-    fig.add_hline(y=-2+veh_vel_mean,line_width=1, line_dash="dash", line_color="blue")
-    fig.add_hline(y=0.5+bike_vel_mean,line_width=1, line_dash="dash", line_color="red")
-    fig.add_hline(y=-0.5+bike_vel_mean,line_width=1, line_dash="dash", line_color="red")
-    fig.add_vline(x=FPI_time,line_width=1, line_dash="solid", line_color="black")
+placeholder = st.empty()
+with placeholder.container():
+    fig = px.line(df, x='Time', y=['Bike forward velocity','Vehicle forward velocity'],color_discrete_sequence = ['navy', 'darkorange'])
+    fig.add_vline(x=test_end_time,line_width=1, line_dash="dash", line_color="red")
+    fig.add_hline(y=2+veh_vel,line_width=1, line_dash="dash", line_color="blue")
+    fig.add_hline(y=-2+veh_vel,line_width=1, line_dash="dash", line_color="blue")
+    fig.add_hline(y=0.5+bike_vel,line_width=1, line_dash="dash", line_color="red")
+    fig.add_hline(y=-0.5+bike_vel,line_width=1, line_dash="dash", line_color="red")
+    if dd > 0:
+        fig.add_vline(x=FPI_time,line_width=1, line_dash="solid", line_color="black")
     fig.add_vline(x=LPI_time,line_width=1, line_dash="solid", line_color="black")
  
-    fig.update_layout({'title':{'text': 'Velocity of Vehicle and Bicycle over Full Path', 
+    fig.update_layout({'title':{'text': 'Velocity of Vehicle and Bicycle over Time', 
                             'x':0.4, 'y':0.95, 
                             'font_size':20, 
                             'font_color':'red'}},
-                 showlegend=True)
-    
-    fig.add_annotation(x=test_start, y=5,
-                text="Start of Test",
-                showarrow=True,
-                arrowhead=1)
+                legend_title="",            
+                showlegend=True)
+ 
     fig.add_annotation(x=t_start, y=0,
                 text="Start of Bicycle",
                 showarrow=True,
                 arrowhead=1)
-    fig.add_annotation(x=veh_t_corridor, y=0,
-                text="Start of Corridor",
-                showarrow=True,
-                arrowhead=1)            
-    fig.add_annotation(x=FPI_time, y=2,
-                text="FPI",
-                showarrow=True,
-                arrowhead=1)
+    if dd > 0:            
+        fig.add_annotation(x=FPI_time, y=2,
+                    text="FPI",
+                    showarrow=True,
+                    arrowhead=1)
     fig.add_annotation(x=LPI_time, y=2,
                 text="LPI",
                 showarrow=True,
                 arrowhead=1)            
-    fig.add_annotation(x=test_end, y=15,
+    fig.add_annotation(x=test_end_time, y=15,
                 text="Simulated Collision",
                 showarrow=True,
                 arrowhead=1)
@@ -434,272 +378,253 @@ with columns[0]:
     y=0.99,
     xanchor="left",
     x=0.01
-    ))                    
-    st.plotly_chart(fig)
-with columns[2]:
-    fig = px.line(df[test_start_idx:test_end_idx], x='Time', y=['Vehicle forward velocity', 'Bike forward velocity'])
-    fig.add_vline(x=test_start,line_width=1, line_dash="dash", line_color="green")
-    fig.add_vline(x=test_end,line_width=1, line_dash="dash", line_color="red")
-    fig.add_hline(y=2+veh_vel_mean,line_width=1, line_dash="dash", line_color="blue")
-    fig.add_hline(y=-2+veh_vel_mean,line_width=1, line_dash="dash", line_color="blue")
-    fig.add_hline(y=0.5+bike_vel_mean,line_width=1, line_dash="dash", line_color="red")
-    fig.add_hline(y=-0.5+bike_vel_mean,line_width=1, line_dash="dash", line_color="red")
-    
-    fig.update_layout({'title':{'text': 'Velocity of Vehicle and Bicycle from Start to Collision', 
+    ))
+    my_saved_image = "plot2.jpeg"
+    pio.write_image(fig, my_saved_image)                    
+    st.plotly_chart(fig, use_container_width=True)
+st.markdown('---')
+################################################################################################################################################
+
+# Plot location of bicycle and vehicle with respect to position of vehicle
+# st.markdown("<h1 style='text-align: center; color: black;'>Vehicle vs Bicycle Position Plot</h1>", unsafe_allow_html=True)
+# fig = px.line(df, x='Vehicle bumper X position', y=['Separation w db adjust','Front tire X position', 'Separation X (veh bumper - bike front tire)'])
+placeholder = st.empty()
+with placeholder.container():
+    fig = px.line(df, x='Vehicle bumper X position', y=['Front tire X position', 'Separation X (veh bumper - bike front tire)'],color_discrete_sequence = ['navy', 'darkorange'])
+    fig.add_vline(x=db_position,line_width=1, line_dash="dashdot", line_color="blue")
+    fig.add_vrect(x0=db_position-0.5, x1=db_position+0.5, line_width=0, fillcolor="green", opacity=0.2)
+    fig.add_vline(x=trig_position,line_width=1, line_dash="dashdot", line_color="green")
+    fig.add_vline(x=veh_trig_location,line_width=1, line_dash="dash", line_color="purple")
+    fig.add_vline(x=veh_end_location,line_width=1, line_dash="dot", line_color="red")
+    fig.add_hline(y=da_position,line_width=1, line_dash="dashdot", line_color="blue")
+    fig.add_hline(y=d_bike_end,line_width=1, line_dash="dot", line_color="red")
+    fig.add_hrect(y0=da_position-0.5, y1=da_position+0.5, line_width=0, fillcolor="green", opacity=0.2)
+    fig.add_hrect(y0=da_db_distance-0.5, y1=da_db_distance+0.5, line_width=0, fillcolor="purple", opacity=.3)
+    fig.update_layout({'title':{'text': 'Bicycle Position over Vehicle Position', 
                             'x':0.5, 'y':0.95, 
                             'font_size':20, 
                             'font_color':'red'}},
-                 showlegend=False)
-    fig.add_annotation(x=test_start, y=5,
-                text="Start of Test",
+                    legend_title="",        
+                    showlegend=True)
+
+    fig.add_annotation(x=db_position, y=da_position,
+                text="da db calc position",
                 showarrow=True,
                 arrowhead=1)
-    fig.add_annotation(x=test_end, y=15,
-                text="Simulated Collision",
-                showarrow=True,
-                arrowhead=1)
-    fig.update_xaxes(title_text='Time (s)',
+                        
+    fig.update_xaxes(title_text='Vehicle Bumper X Position',
                     minor_ticks="outside", 
+                    dtick=10,
                     showgrid=True, 
                     gridwidth=1, 
                     gridcolor='lightgrey')
-
-    fig.update_yaxes(title_text='Velocity (kph)', 
-                    minor_ticks="outside", 
+    fig.add_annotation(x=10, y=da_db_distance,
+                    text="Separation X Veh bumper & Bike tire",
+                    showarrow=True,
+                    arrowhead=1) 
+    fig.add_annotation(x=veh_trig_location, y=0,
+                    text="Bike start - Trigger pt",
+                    showarrow=True,
+                    arrowhead=1) 
+    fig.add_annotation(x=veh_end_location, y=d_bike_end,
+                    text="Collision point",
+                    showarrow=True,
+                    arrowhead=1)                               
+    fig.add_annotation(x=trig_position, y=-20,
+                text="Calc Trigger pt",
+                showarrow=True,
+                arrowhead=1)                
+    fig.update_yaxes(title_text='Bicycle Front tire X Position', 
+                    minor_ticks="outside",
+                    dtick = 10, 
                     showgrid=True, 
                     gridwidth=1, 
                     gridcolor='lightgrey')
-    st.plotly_chart(fig)
+    fig.update_layout(legend=dict(
+        yanchor="top",
+        y=0.99,
+        xanchor="left",
+        x=0.01
+    ))
+    my_saved_image = "plot3.jpeg"
+    pio.write_image(fig, my_saved_image)                
+    st.plotly_chart(fig,use_container_width=True )
+st.markdown('---')
+#################################################################################################################################
+placeholder = st.empty()
+with placeholder.container():
+    if test_options == 'Test Case 4':
+        
+        fig = px.line(df, x='Time_trans', y=['Front tire X position trans', 'Vehicle bumper X position trans'], color_discrete_sequence = ['navy', 'darkorange'])
+        fig.add_vline(x=da_meas_time-start_time_trans,line_width=1, line_dash="dash", line_color="green")
+        # fig.add_vline(x=test_end_time,line_width=1, line_dash="dashdot", line_color="red")
+        fig.add_hline(y=-da,line_width=1, line_dash="dash", line_color="green")
+        fig.add_hline(y=-db,line_width=1, line_dash="dash", line_color="green")
+        fig.add_hrect(y0=-da-0.5, y1=-da+0.5, line_width=0, fillcolor="green", opacity=0.2)
+        fig.add_hrect(y0=-db-0.5, y1=-db+0.5, line_width=0, fillcolor="green", opacity=.2)
 
+        fig.add_vline(x=FPI_time-start_time_trans,line_width=1, line_dash="solid", line_color="black")
+        fig.add_vline(x=LPI_time-start_time_trans,line_width=1, line_dash="solid", line_color="black")
 
+        fig.update_layout(
+            {'title':{'text': 'Vehicle and Bicycle distance over Time', 
+                                'x':0.4, 'y':0.95, 
+                                'font_size':20, 
+                                'font_color':'red'}},
+            legend_title="",
+            showlegend=True)
+        fig.add_annotation(x=t_start-start_time_trans, y=-65,
+                    text="Start of Bicycle",
+                    showarrow=True,
+                    arrowhead=1)
+        
+        fig.add_annotation(x=da_meas_time-start_time_trans, y=-da,
+                    text="da",
+                    showarrow=True,
+                    arrowhead=1)
+        fig.add_annotation(x=da_meas_time-start_time_trans, y=-db,
+                    text="db",
+                    showarrow=True,
+                    arrowhead=1)
+        fig.add_annotation(x=FPI_time-start_time_trans, y=0,
+                    text="FPI",
+                    showarrow=True,
+                    arrowhead=1)
+        fig.add_annotation(x=LPI_time-start_time_trans, y=0,
+                    text="LPI",
+                    showarrow=True,
+                    arrowhead=1)            
+        # fig.add_annotation(x=test_end_time-veh_entercorridor_time, y=15,
+        #             text="Simulated Collision",
+        #             showarrow=True,
+        #             arrowhead=1)
+        fig.update_xaxes(title_text='Time (s)',
+                        minor_ticks="outside", 
+                        showgrid=True, 
+                        gridwidth=1, 
+                        gridcolor='lightgrey')
 
-################################################################################################################################################
-st.markdown("<h1 style='text-align: center; color: black;'>Speed Initiation</h1>", unsafe_allow_html=True)
+        fig.update_yaxes(title_text='Distance (m)', 
+                        minor_ticks="outside", 
+                        showgrid=True, 
+                        gridwidth=1, 
+                        gridcolor='lightgrey')
+        fig.update_layout(legend=dict(
+        yanchor="top",
+        y=0.99,
+        xanchor="left",
+        x=0.01
+        )) 
+        my_saved_image = "plot4.jpeg"
+        pio.write_image(fig, my_saved_image)               
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        
+        fig = px.line(df, x='Time_trans', y=['Front tire X position trans', 'Vehicle bumper X position trans'], color_discrete_sequence = ['navy', 'darkorange'])
+        fig.add_vline(x=da_meas_time-start_time_trans,line_width=1, line_dash="dash", line_color="green")
+        # fig.add_vline(x=test_end_time,line_width=1, line_dash="dashdot", line_color="red")
+        fig.add_hline(y=-da,line_width=1, line_dash="dash", line_color="green")
+        fig.add_hline(y=-db,line_width=1, line_dash="dash", line_color="green")
+        fig.add_hrect(y0=-da-0.5, y1=-da+0.5, line_width=0, fillcolor="green", opacity=0.2)
+        fig.add_hrect(y0=-db-0.5, y1=-db+0.5, line_width=0, fillcolor="green", opacity=.2)
+        fig.add_shape(type="rect", x0=db_delta_minus_time, y0=-da-0.5, x1=db_delta_plus_time, y1=-da+0.5, line=dict(color="Red", width=2, dash="dash"))
+        # fig.add_vline(x=veh_entercorridor_time,line_width=1, line_dash="dash", line_color="red")
+        # fig.add_hline(y=0.5+bike_vel,line_width=1, line_dash="dash", line_color="red")
+        # fig.add_hline(y=-0.5+bike_vel,line_width=1, line_dash="dash", line_color="red")
+        # fig.add_vline(x=FPI_time-veh_entercorridor_time,line_width=1, line_dash="solid", line_color="black")
+        fig.add_vline(x=LPI_time-start_time_trans,line_width=1, line_dash="solid", line_color="black")
 
-# Provide easy access to criteria being tested
-expander = st.expander("Speed Initiation", expanded=False)
-with expander:
-    st.caption('**Criteria 5:**	*Speed initiation:*  Target VRU must reach V_TRGT km/h +/- 0.5 km/h prior to reaching the BICYCLE SPEED LINE that is 5.66 m in front of the BICYCLE START LINE')
-  
-###################################################################################################
-# display pass or fail test criteria
-if crit_5 == True:
-    pass_crit = '<p style="font-family:sans-serif; text-align: center; color:Green; font-size: 28px;">Vehicle Criteria 5 = **PASS**</p>'
-    st.markdown(pass_crit, unsafe_allow_html=True)
+        fig.update_layout(
+            {'title':{'text': 'Vehicle and Bicycle distance over Time', 
+                                'x':0.4, 'y':0.95, 
+                                'font_size':20, 
+                                'font_color':'red'}},
+            legend_title="",                    
+            showlegend=True)
+
+        # fig.add_annotation(x=da_meas_time-start_time_trans, y=d_db_meas +30,
+        #             text="da db Sync time",
+        #             showarrow=True,
+        #             arrowhead=1)
+        fig.add_annotation(x=t_start-start_time_trans, y=-65,
+                    text="Start of Bicycle",
+                    showarrow=True,
+                    arrowhead=1)
+        
+        fig.add_annotation(x=da_meas_time-start_time_trans, y=-da,
+                    text="da",
+                    showarrow=True,
+                    arrowhead=1)
+        fig.add_annotation(x=da_meas_time-start_time_trans, y=-db,
+                    text="db",
+                    showarrow=True,
+                    arrowhead=1)
+
+        fig.add_annotation(x=LPI_time-start_time_trans, y=0,
+                    text="LPI",
+                    showarrow=True,
+                    arrowhead=1)            
+
+        fig.update_xaxes(title_text='Time (s)',
+                        minor_ticks="outside", 
+                        showgrid=True, 
+                        gridwidth=1, 
+                        gridcolor='lightgrey')
+
+        fig.update_yaxes(title_text='Distance (m)', 
+                        minor_ticks="outside", 
+                        showgrid=True, 
+                        gridwidth=1, 
+                        gridcolor='lightgrey')
+        fig.update_layout(legend=dict(
+        yanchor="top",
+        y=0.99,
+        xanchor="left",
+        x=0.01
+        ))
+        my_saved_image = "plot4.jpeg"
+        pio.write_image(fig, my_saved_image)                
+        st.plotly_chart(fig, use_container_width=True)
+st.markdown('---')
+#################################################################################################################################
+criteria = [crit_1, crit_2, crit_3, crit_4, crit_5, crit_6, crit_7, crit_8] #boolean list of criteria
+criteria_list = ['criteria_1', 'criteria_2', 'criteria_3', 'criteria_4', 'criteria_5', 'criteria_6', 'criteria_7', 'criteria_8']
+criteria_int = []
+for i in range(len(criteria)):
+    if criteria[i]:
+        criteria_int.append(1)
+    else:
+        criteria_int.append(-1)
+        
+criteria_df = pd.DataFrame({'criteria': criteria_int, 'criteria_list': criteria_list})
+
+# Map integer values to pass/fail labels
+criteria_df['pass_fail'] = criteria_df['criteria'].map({1: 'Pass', -1: 'Fail'})
+criteria_df['color'] = criteria_df['pass_fail'].map({'Pass': 'green', 'Fail': 'red'})
+# Set color for bars
+color_sequence= criteria_df['criteria'].map({1: 'green', -1: 'Red'})
+
+placeholder = st.empty()
+with placeholder.container():        
     
-else:
-    fail_crit = '<p style="font-family:sans-serif; text-align: center; color:Red; font-size: 28px;">Vehicle Criteria 5 = **FAIL**</p>'
-    st.markdown(fail_crit, unsafe_allow_html=True)
-fig = px.line(df, x='Time', y='Front tire X position')
-fig.add_vline(x=test_start,line_width=1, line_dash="dash", line_color="green")
-fig.add_vline(x=test_end,line_width=1, line_dash="dash", line_color="red")
-fig.add_vline(x=veh_t_corridor,line_width=1, line_dash="dash", line_color="red")
-# fig.add_hline(y=2+veh_vel_mean,line_width=1, line_dash="dash", line_color="blue")
-# fig.add_hline(y=-2+veh_vel_mean,line_width=1, line_dash="dash", line_color="blue")
-# fig.add_hline(y=0.5+bike_vel_mean,line_width=1, line_dash="dash", line_color="red")
-# fig.add_hline(y=-0.5+bike_vel_mean,line_width=1, line_dash="dash", line_color="red")
-fig.add_vline(x=FPI_time,line_width=1, line_dash="solid", line_color="black")
-fig.add_vline(x=LPI_time,line_width=1, line_dash="solid", line_color="black")
+    fig = go.Figure(go.Bar(
+        x=criteria_df['criteria_list'], 
+        y=criteria_df['criteria'],
+        marker_color=criteria_df['color']
+    ))
 
-fig.update_layout({'title':{'text': 'Velocity of Vehicle and Bicycle over Full Path', 
-                        'x':0.4, 'y':0.95, 
-                        'font_size':20, 
-                        'font_color':'red'}},
-                showlegend=True)
+    fig.update_layout(
+        title='Pass Fail Criteria Summary',
+        xaxis_tickangle=-45,
+        yaxis=dict(tickvals=[1,-1], ticktext=['Pass', 'Fail']),
+        yaxis_title='Pass or Fail'
+    )
 
-fig.add_annotation(x=test_start, y=5,
-            text="Start of Test",
-            showarrow=True,
-            arrowhead=1)
-fig.add_annotation(x=t_start, y=0,
-            text="Start of Bicycle",
-            showarrow=True,
-            arrowhead=1)
-fig.add_annotation(x=veh_t_corridor, y=0,
-            text="Start of Corridor",
-            showarrow=True,
-            arrowhead=1)            
-fig.add_annotation(x=FPI_time, y=2,
-            text="FPI",
-            showarrow=True,
-            arrowhead=1)
-fig.add_annotation(x=LPI_time, y=2,
-            text="LPI",
-            showarrow=True,
-            arrowhead=1)            
-fig.add_annotation(x=test_end, y=15,
-            text="Simulated Collision",
-            showarrow=True,
-            arrowhead=1)
-fig.update_xaxes(title_text='Time (s)',
-                minor_ticks="outside", 
-                showgrid=True, 
-                gridwidth=1, 
-                gridcolor='lightgrey')
-
-fig.update_yaxes(title_text='Front tire X position', 
-                minor_ticks="outside", 
-                showgrid=True, 
-                gridwidth=1, 
-                gridcolor='lightgrey')
-fig.update_layout(legend=dict(
-yanchor="top",
-y=0.99,
-xanchor="left",
-x=0.01
-))                    
-st.plotly_chart(fig)
-
-################################################################################################### 
-st.markdown("<h1 style='text-align: center; color: black;'>Position Maintenance</h1>", unsafe_allow_html=True)
-
-# Provide easy access to criteria being tested
-expander = st.expander("Position Maintenance", expanded=False)
-with expander:
-    st.caption('**Criteria 8:**	*Position maintenance:*  The front edge of the Ego Vehicle must be within +/- 0.5 m of LINE B at the instance the front edge of the Target VRU either reaches LINE A – 0.5 m, or LINE A + 0.5 m.')
-  
-###################################################################################################   
-if crit_8 == True:
-    pass_crit = '<p style="font-family:sans-serif; text-align: center; color:Green; font-size: 28px;">Bike Criteria 8 = **PASS**</p>'
-    st.markdown(pass_crit, unsafe_allow_html=True)
-    
-else:
-    fail_crit = '<p style="font-family:sans-serif; text-align: center; color:Red; font-size: 28px;">Bike Criteria 8 = **FAIL**</p>'
-    st.markdown(fail_crit, unsafe_allow_html=True)
-# Plot location of bicycle and vehicle with respect to position of vehicle
-st.markdown("<h1 style='text-align: center; color: black;'> Test Plot for da and db position</h1>", unsafe_allow_html=True)
-fig = px.line(df, x='Vehicle bumper X position', y=['Separation w db adjust','Front tire X position'])
-fig.add_vline(x=db_pos,line_width=1, line_dash="dashdot", line_color="blue")
-fig.add_vrect(x0=db_pos-0.5, x1=db_pos+0.5, line_width=0, fillcolor="green", opacity=0.2)
-fig.add_vline(x=trig_pos,line_width=1, line_dash="dashdot", line_color="green")
-fig.add_vline(x=db_meas,line_width=1, line_dash="dash", line_color="purple")
-fig.add_vline(x=x_start,line_width=1, line_dash="dot", line_color="black")
-fig.add_hline(y=da_pos,line_width=1, line_dash="dashdot", line_color="blue")
-fig.add_hrect(y0=da_pos-0.5, y1=da_pos+0.5, line_width=0, fillcolor="green", opacity=0.2)
-fig.add_hrect(y0=da_db_distance-0.5, y1=da_db_distance+0.5, line_width=0, fillcolor="purple", opacity=.3)
-fig.update_layout({'title':{'text': 'Calculated Required Positions', 
-						'x':0.5, 'y':0.95, 
-						'font_size':20, 
-						'font_color':'red'}},
-				showlegend=True)
-
-fig.add_annotation(x=db_pos-10, y=da_pos,
-			text="da calc position",
-			showarrow=True,
-			arrowhead=1)
-					
-fig.update_xaxes(title_text='Vehicle Bumper X Position',
-				minor_ticks="outside", 
-                dtick=10,
-				showgrid=True, 
-				gridwidth=1, 
-				gridcolor='lightgrey')
-fig.add_annotation(x=10, y=da_db_distance,
-				text="Distance require between Veh & Bike (da-db)",
-				showarrow=True,
-				arrowhead=1) 
-fig.add_annotation(x=db_meas, y=0,
-				text="Bike start - Trigger pt",
-				showarrow=True,
-				arrowhead=1) 
-fig.add_annotation(x=x_start, y=5,
-				text="Test start",
-				showarrow=True,
-				arrowhead=1)                               
-fig.add_annotation(x=db_pos, y=da_pos-10,
-			text="db calc position",
-			showarrow=True,
-			arrowhead=1)
-fig.add_annotation(x=trig_pos, y=-20,
-			text="Calc Trigger pt",
-			showarrow=True,
-			arrowhead=1)                
-fig.update_yaxes(title_text='Bicycle Front tire X Position wrt Vehicle', 
-				minor_ticks="outside",
-                dtick = 10, 
-				showgrid=True, 
-				gridwidth=1, 
-				gridcolor='lightgrey')
-fig.update_layout(legend=dict(
-    yanchor="top",
-    y=0.99,
-    xanchor="left",
-    x=0.01
-))                
-st.plotly_chart(fig)
-
-
-
-
-
-
-
-
-
-fig = px.line(df, x='Time', y=['Front tire X position', 'Vehicle bumper X position'])
-# fig = px.line(df, x='Time', y=['X position', 'Actual X (front axle)', 'Object 1 actual X (front axle)','Object 1 relative longitudinal distance'])
-# fig = px.line(df, x='Time', y=['X position', 'Object1 actual X (front axle)'])
-fig.add_vline(x=test_start,line_width=1, line_dash="dash", line_color="green")
-fig.add_vline(x=test_end,line_width=1, line_dash="dash", line_color="red")
-# fig.add_hline(y=2+veh_vel_mean,line_width=1, line_dash="dash", line_color="blue")
-# fig.add_hline(y=-2+veh_vel_mean,line_width=1, line_dash="dash", line_color="blue")
-# fig.add_hline(y=0.5+bike_vel_mean,line_width=1, line_dash="dash", line_color="red")
-# fig.add_hline(y=-0.5+bike_vel_mean,line_width=1, line_dash="dash", line_color="red")
-fig.add_vline(x=FPI_time,line_width=1, line_dash="solid", line_color="black")
-fig.add_vline(x=LPI_time,line_width=1, line_dash="solid", line_color="black")
-
-fig.update_layout({'title':{'text': 'Vehicle and Bicycle distance over Full Path', 
-                        'x':0.4, 'y':0.95, 
-                        'font_size':20, 
-                        'font_color':'red'}},
-                showlegend=True)
-
-fig.add_annotation(x=test_start, y=5,
-            text="Start of Test",
-            showarrow=True,
-            arrowhead=1)
-fig.add_annotation(x=t_start, y=0,
-            text="Start of Bicycle",
-            showarrow=True,
-            arrowhead=1)
-fig.add_annotation(x=FPI_time, y=2,
-            text="FPI",
-            showarrow=True,
-            arrowhead=1)
-fig.add_annotation(x=LPI_time, y=2,
-            text="LPI",
-            showarrow=True,
-            arrowhead=1)            
-fig.add_annotation(x=test_end, y=15,
-            text="Simulated Collision",
-            showarrow=True,
-            arrowhead=1)
-fig.update_xaxes(title_text='Time (s)',
-                minor_ticks="outside", 
-                showgrid=True, 
-                gridwidth=1, 
-                gridcolor='lightgrey')
-
-fig.update_yaxes(title_text='Relative distance (m)', 
-                minor_ticks="outside", 
-                showgrid=True, 
-                gridwidth=1, 
-                gridcolor='lightgrey')
-fig.update_layout(legend=dict(
-yanchor="top",
-y=0.99,
-xanchor="left",
-x=0.01
-))                
-st.plotly_chart(fig)
-
-
-
-
-
-
-
-
+    my_saved_image = "plot5.jpeg"
+    pio.write_image(fig, my_saved_image)                
+    st.plotly_chart(fig, use_container_width=True)
+st.markdown('---')
+#################################################################################################################################
 # video_file = open('./Test1 _MERGE.mp4', 'rb')
 # video_bytes = video_file.read()
 
@@ -708,6 +633,4 @@ st.plotly_chart(fig)
 # firebird = pd.DataFrame({'test track' : ['Firebird Racetrack', 'Sensata'], 'lat' :[ 43.7674206156433,43.60960308154709] , 'lon' : [-116.469511058211,-116.31195661539411]})
 # st.write(firebird)
 # st.map(firebird)
-
-
-# st.write(fig)
+# from fpdf import FPDF
