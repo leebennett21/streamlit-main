@@ -261,8 +261,7 @@ if __name__ == '__main__':
         # pdf.cell(40, 10, report_text)
         create_report(test_filename) 
         html = create_download_link(pdf.output(dest="S").encode("latin-1"), "test")
-
-    st.markdown(html, unsafe_allow_html=True)
+        st.markdown(html, unsafe_allow_html=True)
     
     # local_css("style/style.css")
     # if st.button('Do you want to generate a report?'):
