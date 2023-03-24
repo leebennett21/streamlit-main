@@ -604,7 +604,7 @@ with placeholder.container():
         fig.add_hrect(y0=-db-0.5, y1=-db+0.5, line_width=0, fillcolor="green", opacity=.2)
 
         fig.update_layout(
-            {'title':{'text': 'Vehicle and Bicycle distance over Time', 
+            {'title':{'text': 'Zoomed in View @ Sync pt Vehicle and Bicycle distance over Time', 
                                 'x':0.4, 'y':0.95, 
                                 'font_size':20, 
                                 'font_color':'red'}},
