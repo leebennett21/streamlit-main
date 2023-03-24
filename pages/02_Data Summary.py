@@ -610,11 +610,7 @@ with placeholder.container():
                                 'font_color':'red'}},
             legend_title="",
             showlegend=True)
-        # fig.add_annotation(x=t_start-start_time_trans, y=-65,
-        #             text="Start of Bicycle",
-        #             showarrow=True,
-        #             arrowhead=1)
-        
+ 
         fig.add_annotation(x=da_meas_time-start_time_trans, y=-da,
                     text="da",
                     showarrow=True,
@@ -623,18 +619,7 @@ with placeholder.container():
                     text="db",
                     showarrow=True,
                     arrowhead=1)
-        # fig.add_annotation(x=FPI_time-start_time_trans, y=0,
-        #             text="FPI",
-        #             showarrow=True,
-        #             arrowhead=1)
-        # fig.add_annotation(x=LPI_time-start_time_trans, y=0,
-        #             text="LPI",
-        #             showarrow=True,
-        #             arrowhead=1)            
-        # fig.add_annotation(x=test_end_time-veh_entercorridor_time, y=15,
-        #             text="Simulated Collision",
-        #             showarrow=True,
-        #             arrowhead=1)
+ 
         fig.update_xaxes(title_text='Time (s)',
                         minor_ticks="outside", 
                         showgrid=True, 

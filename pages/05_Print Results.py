@@ -233,6 +233,13 @@ def create_report(filename = "Test_report.pdf"):
     pdf.set_xy(10, Height/2)
     pdf.cell(0, 20, txt = 'Time Plot Illustrating Criteria 8', align='C')
     pdf.image("plot4.jpeg", 0, 20+ Height/2, Width)
+    
+    #page 4 of the results
+    pdf.add_page()
+    pdf.cell(0, 20, txt = 'Zoomed in Time Plot Illustrating Criteria 8', align='C')
+    pdf.image("plot6.jpeg", 0, 30, Width )
+    pdf.ln()
+    
     # Save the PDF
     pdf.output(filename)
 
