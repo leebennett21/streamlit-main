@@ -165,7 +165,12 @@ if uploaded_file:
     conv2kmph=3.6
     df['Vehicle forward velocity'] = conv2kmph* df['Forward velocity']
     df['Bike forward velocity']=conv2kmph* df['Object 1 forward velocity (ref point)']
-
+    #due to equipment malfunction issues check if empty arrays
+    if df['Object 1 forward velocity (ref point)'].max() <1:
+        st.write('---')
+        fail_bike_vel = f"""<p style="font-family:sans-serif; color:Red; font-size: 28px;">Object 1 forward velocity (ref point) = **FAIL** - empty array</p>"""
+        st.markdown(fail_bike_vel, unsafe_allow_html=True)
+        st.write('---')
     # correct for adjustment done at the track for wider lateral distances
     if d_lat == 4.25:
         df["Vehicle Lateral position"]= df["Y position"]- 1
@@ -186,7 +191,6 @@ if uploaded_file:
     
     def find_trigger_event(df, bike_vel, threshold=0.2):
         lower_lim = (bike_vel - 0.5) / 3.6
-
         # Find the time index when the bike velocity passes through the lower limit for the first time
         df_lower_lim = df[df['Bike forward velocity'] >= lower_lim]
         test_start_idx = df_lower_lim.index[0]
